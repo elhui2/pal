@@ -1,16 +1,30 @@
-# pal
+# pal Version 0.9
 
-Aplicacion pal para iOS y Android
+Alarma PAL para iOS y Android
 
-## Getting Started
+## Descripcion
 
-This project is a starting point for a Flutter application.
+Proyecto en flutter para Alertas de Seguridad en iOS y Android
 
-A few resources to get you started if this is your first Flutter project:
+### Datos importantes del sistema 
+Todos los usuarios pueden tener hasta tres referidos con estas relaciones:
+- padre
+- hermano
+- pareja
+- amigo
+- otro
 
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
+### TODO
+- Al presionar el boton del gps, actualizar el mapa
+- Seguridad por token al consumir el API
++ Revisar Switch de botones
+- Comprobar Token
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+### Cambios en esta version
+
+- El boton de ubicacion ahora funcionara para revisar los parametros del gps
+- Ahora los pinches mapas de iOS no jalan :(
+- Alerta activos con el hearthbeat
+- Procesar la ubicacion desde alerts por el listener
+- Perfil de usuario cambiar contraseña
+- Revisar la edicion de referidos con los datos de web
