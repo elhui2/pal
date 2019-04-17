@@ -1,4 +1,4 @@
-package rebootproject.mx.pal;
+package mx.rebootproject.pal;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;

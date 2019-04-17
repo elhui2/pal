@@ -40,14 +40,12 @@ class _GmapState extends State<Gmap> {
   @override
   Widget build(BuildContext context) {
     return GoogleMap(
-      mapType: MapType.terrain,
+      mapType: MapType.normal,
       initialCameraPosition: mainCamara,
       onMapCreated: (GoogleMapController controller) {
         mapController = controller;
       },
-      
-      markers: _markers,
-      
+      markers: _markers
     );
   }
 

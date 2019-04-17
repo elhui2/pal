@@ -44,11 +44,9 @@ class _AlertsState extends State<Alerts> {
   initState() {
     location.onLocationChanged().listen((currentLocation) {
       print("Intentando moverme");
-      if (currentLocation != null && model != null && gMap != null) {
-        model.setCurrentLocation(
-            currentLocation.latitude, currentLocation.longitude);
-        gMap.userLocation(model.currentLocation);
-      }
+      model.setCurrentLocation(
+          currentLocation.latitude, currentLocation.longitude);
+      gMap.userLocation(model.currentLocation);
     });
     _deviceInfo();
     super.initState();
@@ -96,9 +94,20 @@ class _AlertsState extends State<Alerts> {
                 icon: Icon(Icons.gps_fixed),
                 onPressed: () {
                   print("Buscar geolocalización");
-                  location.hasPermission().then((permisions){
-                    location.requestPermission().then((request){
-                      print("Buscar geolocalización $request");
+                  location.hasPermission().then((permisions) {
+                    location.requestPermission().then((request) {
+                      print("Permisos geolocalizacion -> $request");
+                      print("Guardando actual y moviendo el mapa");
+                      if (request == true) {
+                        location.getLocation().then((currentLoc) {
+                          print("Mover Mapa a ${currentLoc.latitude},${currentLoc.longitude}");
+                          model.setCurrentLocation(
+                              currentLoc.latitude, currentLoc.longitude);
+                              gMap.userLocation(model.currentLocation);
+                        }).catchError((error){
+                          print("Error  ${error.toString()}");
+                        });
+                      }
                     });
                   });
                 },
@@ -205,6 +214,7 @@ class _AlertsState extends State<Alerts> {
           );
         },
       );
+      print("Respuesta de la alerta $response}");
       if (response['success'] == true) {
         if (type == 1) {
           model.setActiveAlert(false);

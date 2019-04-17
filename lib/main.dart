@@ -8,6 +8,10 @@ import './pages/refers_admin.dart';
 import './pages/alerts.dart';
 import './scoped-models/main.dart';
 
+/**
+ * main.dart
+ * @version 0
+ */
 void main() {
   final Config config = Config();
   runApp(MyApp());
