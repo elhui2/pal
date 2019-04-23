@@ -1,5 +1,7 @@
+import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'dart:io' show Platform;
 
 import './config.dart';
 import './pages/auth.dart';
@@ -29,7 +31,11 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    _model.autoAuthenticate();
+    _model.autoAuthenticate().then((success){
+      if(success){
+        _model.checkToken();
+      }
+    });
     super.initState();
   }
 

@@ -12,7 +12,7 @@ import '../models/location_data.dart';
 
 /**
  * ConnectedPalsModel
- * @version 0.7
+ * @version 0.9.5
  * @author Daniel Huidobro <daniel@rebootproject.mx>
  * Modelo principal del app
  */
@@ -38,7 +38,6 @@ class AlertsModel extends ConnectedPalsModel {
         .get(config.apiUrl + '/users_alerts/get/${_authenticatedUser.idUser}')
         .then((http.Response response) {
       final Map<String, dynamic> alertListData = jsonDecode(response.body);
-      print(alertListData['response']);
       if (alertListData['status'] == false) {
         _isLoading = false;
         notifyListeners();
@@ -65,33 +64,47 @@ class AlertsModel extends ConnectedPalsModel {
     } else {
       _activeAlert = false;
     }
+    notifyListeners();
   }
 
-  Future<Map<String, dynamic>> sendAlert(String idDevice, int type) {
-    print("Dispositivo a enviar $idDevice codigo $type");
+  ///SendAlert
+  ///@version 0.9.5
+  ///Envia una alerta al servidor
+  ///
+  Future<Map<String, dynamic>> sendAlert(int type) {
     _isLoading = true;
+    notifyListeners();
     return http.post(config.apiUrl + '/alerts', body: {
-      'device': idDevice,
+      'device': _authenticatedUser.idDevice,
       'code_panic': type.toString(),
       'lat': _userCurrentLocation.latitude.toString(),
       'lng': _userCurrentLocation.longitude.toString()
     }).then((http.Response response) {
-      print(response.body);
-      final Map<String, dynamic> responseData = json.decode(response.body);
 
-      bool hasError = true;
+      Map<String, dynamic> responseData;
+      bool success = true;
       String message = 'Ocurrio un error';
+      try {
+        responseData = json.decode(response.body);
+      } catch (error) {
+        success = false;
+        _isLoading = false;
+        notifyListeners();
+        message = error.toString();
+        return {'success': success, 'message': message};
+      }
 
-      if (responseData['status']) {
-        hasError = false;
+      if (responseData['status'] == true) {
+        success = true;
         message = 'Se envió la alerta';
       } else {
+        success = false;
         message = responseData['message'];
       }
 
       _isLoading = false;
       notifyListeners();
-      return {'success': !hasError, 'message': message};
+      return {'success': success, 'message': message};
     });
   }
 
@@ -111,12 +124,10 @@ class RefersModel extends ConnectedPalsModel {
    */
   Future<Null> fetchRefers() {
     _isLoading = true;
-    print(config.apiUrl + '/refers/get/${_authenticatedUser.idUser}');
     return http
         .get(config.apiUrl + '/refers/get/${_authenticatedUser.idUser}')
         .then((http.Response response) {
       final Map<String, dynamic> referListData = jsonDecode(response.body);
-      //print(referListData['response']);
       if (referListData['status'] == false) {
         _isLoading = false;
         notifyListeners();
@@ -151,7 +162,6 @@ class RefersModel extends ConnectedPalsModel {
       'userId': _authenticatedUser.idUser.toString()
     }).then((http.Response response) {
       final Map<String, dynamic> responseData = json.decode(response.body);
-      //print(responseData);
       if (responseData['status']) {
         final Refer newRefer = Refer(
             idRefer: int.parse(responseData['response']['id_user_reference']),
@@ -179,7 +189,6 @@ class RefersModel extends ConnectedPalsModel {
       'relationship': relationship
     }).then((http.Response response) {
       final Map<String, dynamic> responseData = json.decode(response.body);
-      //print(responseData);
       if (responseData['status']) {
         final Refer updatedRefer = Refer(
             idRefer: int.parse(responseData['response']['id_user_reference']),
@@ -248,6 +257,7 @@ class UserModel extends ConnectedPalsModel {
       _userCurrentLocation = new LocationData(
           latitude: lat, longitude: lng, description: null, address: null);
     }
+    notifyListeners();
   }
 
   LocationData get currentLocation {
@@ -312,7 +322,6 @@ class UserModel extends ConnectedPalsModel {
     final http.Response response = await http.post(
         config.apiUrl + '/users/update',
         body: {"password": password, "token": _authenticatedUser.token});
-    print(response.body);
     final Map<String, dynamic> responseData = json.decode(response.body);
 
     bool hasError = true;
@@ -348,11 +357,11 @@ class UserModel extends ConnectedPalsModel {
 
   /**
    * autoAuthenticate
-   * @version 0.7
+   * @version 0.9.5
    * Revisa la autenticacion y el token de acceso
    * TODO: Renovar el token cada 24 hrs
    */
-  void autoAuthenticate() async {
+  Future<bool> autoAuthenticate() async {
     _isLoading = true;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String token = prefs.getString('token');
@@ -362,7 +371,7 @@ class UserModel extends ConnectedPalsModel {
     final String lastName = prefs.getString('lastName');
     final String userEmail = prefs.getString('email');
     final String mobileNum = prefs.getString('mobileNum');
-
+    bool _success = true;
     if (token != null && idDevice != null) {
       _authenticatedUser = User(
           idUser: idUser,
@@ -372,27 +381,47 @@ class UserModel extends ConnectedPalsModel {
           phone: mobileNum,
           token: token,
           idDevice: idDevice);
-
-//      final http.Response response =
-//          await http.post(config.apiUrl + '/alerts', body: {
-//        "device": idDevice,
-//        "token": token,
-//        'code_panic': 2.toString(), //Hearbeat
-//      });
-//      //Respuesta del servidor
-//      print(response.body);
-//      final Map<String, dynamic> responseData = json.decode(response.body);
-//
-//      if (responseData['status'] == true) {
-//        //TODO: Renovar el token cada 24 hrs
-//        _activeAlert = responseData['response']['activeAlert'];
-//      } else {
-//        _authenticatedUser = null;
-//      }
-      _isLoading = false;
-      notifyListeners();
+    }else{
+      _authenticatedUser = null;
+      _success = false;
     }
+    _isLoading = false;
+    notifyListeners();
+    return _success;
   }
+
+  ///
+  /// checkToken
+  /// @version 0.9.5
+  /// Verificara el token del usuario y lo renueva si es necesario
+  /// TODO: Verificar token de acceso en api y app
+  void checkToken() async {
+    _isLoading = true;
+    notifyListeners();
+    final http.Response response =
+        await http.post(config.apiUrl + '/alerts', body: {
+      "device": _authenticatedUser.idDevice,
+      "token": _authenticatedUser.token,
+      'code_panic': 2.toString(), //Hearbeat
+      'lat': (_userCurrentLocation == null)
+          ? 0.0.toString()
+          : _userCurrentLocation.latitude.toString(),
+      'lng': (_userCurrentLocation == null)
+          ? 0.0.toString()
+          : _userCurrentLocation.longitude.toString(),
+    });
+    final Map<String, dynamic> responseData = json.decode(response.body);
+
+    if (responseData['status'] == true) {
+      //TODO: Renovar el token cada 24 hrs
+      _activeAlert = responseData['response']['activeAlert'];
+    } else {
+      _authenticatedUser = null;
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
+
 }
 
 class UtilityModel extends ConnectedPalsModel {

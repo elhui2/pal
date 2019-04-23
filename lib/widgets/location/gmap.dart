@@ -51,7 +51,6 @@ class _GmapState extends State<Gmap> {
 
   void userLocation(LocationData location) {
     if (location != null && mapController!=null) {
-      print("Chambiando en esto ${location.latitude} & ${location.latitude}");
       currentPosition = new LatLng(location.latitude, location.longitude);
       setState(() {
         currentMarker = new Marker(
@@ -65,9 +64,8 @@ class _GmapState extends State<Gmap> {
           icon: BitmapDescriptor.defaultMarker,
         );
         _markers.add(currentMarker);
+        centerMap(currentPosition);
       });
-
-      centerMap(currentPosition);
     }
   }
 

@@ -15,10 +15,11 @@ Todos los usuarios pueden tener hasta tres referidos con estas relaciones:
 - otro
 
 ### TODO
-- Al presionar el boton del gps, actualizar el mapa
 - Seguridad por token al consumir el API
-+ Revisar Switch de botones
 - Comprobar Token
+- Cambiar el Icono de alerta de seguridad
+- Verificar cuando las mensajes son heartbeat y tracks y no mostrar alerta
+
 
 ### Cambios en esta version
 
@@ -28,3 +29,5 @@ Todos los usuarios pueden tener hasta tres referidos con estas relaciones:
 - Procesar la ubicacion desde alerts por el listener
 - Perfil de usuario cambiar contraseña
 - Revisar la edicion de referidos con los datos de web
+- Al presionar el boton del gps, actualizar el mapa
+- Revisar Switch de botones
