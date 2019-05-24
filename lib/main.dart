@@ -1,7 +1,5 @@
-import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
-import 'dart:io' show Platform;
 
 import './config.dart';
 import './pages/auth.dart';
@@ -10,10 +8,11 @@ import './pages/refers_admin.dart';
 import './pages/alerts.dart';
 import './scoped-models/main.dart';
 
-/**
- * main.dart
- * @version 0
- */
+///
+/// main.dart
+/// @version 0.9.7
+/// @author Daniel Huidobro daniel@rebootproject.mx
+///
 void main() {
   final Config config = Config();
   runApp(MyApp());
@@ -31,8 +30,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    _model.autoAuthenticate().then((success){
-      if(success){
+    _model.autoAuthenticate().then((success) {
+      if (success) {
         _model.checkToken();
       }
     });
@@ -50,12 +49,10 @@ class _MyAppState extends State<MyApp> {
             accentColor: Colors.deepOrangeAccent,
             buttonColor: Colors.deepOrange),
         routes: {
-          '/': (BuildContext context) => ScopedModelDescendant(
-                builder: (BuildContext context, Widget child, MainModel model) {
-                  return model.user == null ? AuthPage() : Alerts(_model);
-                },
-              ),
-          '/button': (BuildContext context) => Alerts(_model),
+          '/': (BuildContext context) => ScopedModelDescendant(builder:
+                  (BuildContext context, Widget child, MainModel model) {
+                return model.user == null ? AuthPage() : Alerts(_model);
+              }),
           '/alerts': (BuildContext context) => AlertsAdmin(_model),
           '/refers': (BuildContext context) => RefersAdmin(_model),
         },
@@ -66,8 +63,7 @@ class _MyAppState extends State<MyApp> {
           }
           return null;
         },
-        onUnknownRoute: (RouteSettings settings) {
-        },
+        onUnknownRoute: (RouteSettings settings) {},
       ),
     );
   }

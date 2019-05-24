@@ -7,211 +7,191 @@ import '../scoped-models/main.dart';
 import '../config.dart';
 import '../widgets/ui_elements/nav_bar.dart';
 import '../widgets/location/gmap.dart';
+import '../widgets/ui_elements/buttons_alert.dart';
 
 /**
  * alerts
- * @version 0.9.5
+ * @version 0.9.7
  * @author Daniel Huidobro <daniel@rebootproject.mx>
  * Boton de alerta del app
  */
 class Alerts extends StatefulWidget {
   final Config config = Config();
   final MainModel model;
-  Scaffold mainContainer;
 
   Alerts(this.model);
 
   @override
   State<StatefulWidget> createState() {
-    return _AlertsState(model);
+    return _AlertsState();
   }
 }
 
 class _AlertsState extends State<Alerts> {
   final location = geoloc.Location();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
-  //Constructor
-  _AlertsState(this.model);
-
-  //Objetos dinamicos
+  //Objetos dinamicos, esto es una marranada
   BuildContext scaffoldContext;
-  MainModel model;
-
-
-  Gmap gMap = Gmap();
 
   @override
   initState() {
-    location.onLocationChanged().listen((currentLocation) {
-      model.setCurrentLocation(
-          currentLocation.latitude, currentLocation.longitude);
-      gMap.userLocation(model.currentLocation);
-    });
-
     super.initState();
+    print("Alerts initState");
+  }
+
+  void _sendAlert(int type, Function alert) async {
+    alert(type).then((response) {
+      print("Respuesta de la alerta en UI $response");
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    Container buttons = Container(
-      width: double.infinity,
-      child: Row(
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width / 2,
-            child: Column(
-              children: <Widget>[
-                Text(
-                  "Seguridad",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Colors.blue, fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  iconSize: MediaQuery.of(context).size.width / 3,
-                  color: (model.getActiveAlert == true)
-                      ? Colors.grey
-                      : Colors.blue,
-                  icon: Icon(Icons.add_alert),
-                  onPressed: () {
-                    _sendAlert(3);
-                  },
-                ),
-              ],
+    return ScopedModelDescendant<MainModel>(
+        builder: (BuildContext context, Widget child, MainModel model) {
+      return Scaffold(
+        key: _scaffoldKey,
+        drawer: NavBar(model),
+        appBar: AppBar(
+          title: Text('Alertas'),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon((model.currentLocation == null)
+                  ? Icons.gps_not_fixed
+                  : Icons.gps_fixed),
+              onPressed: () {
+                location.hasPermission().then((permisions) {
+                  print("NavButton hasPermission $permisions");
+                  if (permisions == false) {
+                    location.requestPermission().then((request) {
+                      print("NavButton requestPermission $request");
+                      if (request == true) {
+                        location.getLocation().then((currentLoc) {
+                          print(
+                              "NavButton getLocation ${currentLoc.latitude},${currentLoc.longitude}");
+                          model.setCurrentLocation(
+                              currentLoc.latitude, currentLoc.longitude);
+                          Navigator.pushReplacementNamed(context, '/');
+                        }).catchError((error) {
+                          print("Error  ${error.toString()}");
+                        });
+                      }
+                    });
+                  }
+                });
+              },
+            )
+          ],
+        ),
+        body: Column(
+          children: <Widget>[
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height / 3,
+              child: Gmap(model),
             ),
-          ),
-          Container(
-            padding: EdgeInsets.all(32.0),
-            width: MediaQuery.of(context).size.width / 2,
-            child: Column(
-              children: <Widget>[
-                Text(
-                  "Medico",
-                  textAlign: TextAlign.center,
-                  style:
-                      TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height / 9,
+              color: Colors.deepOrange,
+              child: Center(
+                child: Text(
+                  "Revisa tu ubicación en el mapa",
+                  style: TextStyle(color: Colors.white, fontSize: 18),
                 ),
-                IconButton(
-                  iconSize: MediaQuery.of(context).size.width / 3,
-                  color:
-                      (model.getActiveAlert == true) ? Colors.grey : Colors.red,
-                  icon: Icon(Icons.accessible),
-                  onPressed: () {
-                    //_sendAlert(4);
-                  },
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-
-    return Scaffold(
-      key: _scaffoldKey,
-      drawer: NavBar(widget.model),
-      appBar: AppBar(
-        title: Text('Alerta'),
-        actions: <Widget>[
-          ScopedModelDescendant<MainModel>(
-            builder: (BuildContext context, Widget child, MainModel model) {
-              scaffoldContext = context;
-              return IconButton(
-                icon: Icon(Icons.gps_fixed),
-                onPressed: () {
-                  print("Buscar geolocalización");
-                  location.hasPermission().then((permisions) {
-                    if (permisions) {
-                      location.getLocation().then((currentLoc) {
-                        print(
-                            "Mover Mapa a ${currentLoc.latitude},${currentLoc.longitude}");
-                        model.setCurrentLocation(
-                            currentLoc.latitude, currentLoc.longitude);
-                        gMap.userLocation(model.currentLocation);
-                      }).catchError((error) {
-                        print("Error  ${error.toString()}");
-                      }).then((currentLoc) {
-                        print("Mover Mapa a ${currentLoc.toString()}");
-                      });
-                    } else {
-                      location.requestPermission().then((request) {
-                        print("Permisos geolocalizacion -> $request");
-                        if (request == true) {
-                          location.getLocation().then((currentLoc) {
-                            print(
-                                "Mover Mapa a ${currentLoc.latitude},${currentLoc.longitude}");
-                            model.setCurrentLocation(
-                                currentLoc.latitude, currentLoc.longitude);
-                            gMap.userLocation(model.currentLocation);
-                          }).catchError((error) {
-                            print("Error  ${error.toString()}");
-                          });
-                        }
-                      });
-                    }
-                  });
-                },
-              );
-            },
-          )
-        ],
-      ),
-      body: Column(
-        children: <Widget>[
-          Container(
-            height: MediaQuery.of(context).size.height / 3,
-            width: MediaQuery.of(context).size.width,
-            child: gMap,
-          ),
-          (model.isLoading)
-              ? Center(child: CircularProgressIndicator())
-              : buttons,
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height: 64,
-            padding: const EdgeInsets.all(16.0),
-            child: new FlatButton(
-              textColor: Colors.white,
-              color: (model.getActiveAlert == true) ? Colors.red : Colors.grey,
-              onPressed: (() {
-                _sendAlert(1);
-              }),
-              child: (model.getActiveAlert == true)
-                  ? Text("Cancelar Alerta Activa")
-                  : Text("No tienes alertas activas"),
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height / 3,
+              child: Center(
+                child: (model.getActiveAlert)
+                    ? Center(
+                        child: Column(children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          child: Text(
+                            "Cancelar Alerta",
+                            style: TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18),
+                          ),
+                        ),
+                        Container(
+                          child: IconButton(
+                            iconSize: MediaQuery.of(context).size.width / 3,
+                            color: Colors.red,
+                            icon: Icon(Icons.cancel),
+                            onPressed: () {
+                              _sendAlert(1, model.sendAlert);
+                            },
+                          ),
+                        )
+                      ]))
+                    : Row(
+                        children: <Widget>[
+                          Container(
+                            width: MediaQuery.of(context).size.width / 2,
+                            child: Center(
+                                child: Column(children: <Widget>[
+                              Container(
+                                padding: EdgeInsets.all(10),
+                                child: Text(
+                                  "Policía",
+                                  style: TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18),
+                                ),
+                              ),
+                              Container(
+                                child: IconButton(
+                                  iconSize:
+                                      MediaQuery.of(context).size.width / 3,
+                                  color: Colors.blue,
+                                  icon: Icon(Icons.security),
+                                  onPressed: () {
+                                    _sendAlert(3, model.sendAlert);
+                                  },
+                                ),
+                              )
+                            ])),
+                          ),
+                          Container(
+                            width: MediaQuery.of(context).size.width / 2,
+                            child: Center(
+                                child: Column(children: <Widget>[
+                              Container(
+                                padding: EdgeInsets.all(10),
+                                child: Text(
+                                  "Médico",
+                                  style: TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18),
+                                ),
+                              ),
+                              Container(
+                                child: IconButton(
+                                  iconSize:
+                                      MediaQuery.of(context).size.width / 3,
+                                  color: Colors.red,
+                                  icon: Icon(Icons.add_circle_outline),
+                                  onPressed: () {
+                                    _sendAlert(4, model.sendAlert);
+                                  },
+                                ),
+                              )
+                            ])),
+                          ),
+                        ],
+                      ),
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _sendAlert(int type) async {
-    model.sendAlert(type).then((response) {
-      print("Respuesta de la alerta en UI $response loading ${model.isLoading} activeAlert ${model.getActiveAlert}");
-      String _message = response['message'];
-      if (response['success'] == true) {
-        if (type == 1) {
-          model.setActiveAlert(false);
-        } else {
-          model.setActiveAlert(true);
-        }
-      } else {
-        if (type == 1) {
-          model.setActiveAlert(false);
-        }
-      }
-
-      final snackBar = new SnackBar(
-        content: Text(_message),
-        action: SnackBarAction(
-          label: 'OK',
-          onPressed: (() {}),
+          ],
         ),
       );
-
-      Scaffold.of(scaffoldContext).showSnackBar(snackBar);
     });
   }
 }

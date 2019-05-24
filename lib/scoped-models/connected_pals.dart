@@ -12,7 +12,7 @@ import '../models/location_data.dart';
 
 /**
  * ConnectedPalsModel
- * @version 0.9.5
+ * @version 0.9.7
  * @author Daniel Huidobro <daniel@rebootproject.mx>
  * Modelo principal del app
  */
@@ -80,26 +80,28 @@ class AlertsModel extends ConnectedPalsModel {
       'lat': _userCurrentLocation.latitude.toString(),
       'lng': _userCurrentLocation.longitude.toString()
     }).then((http.Response response) {
-
       Map<String, dynamic> responseData;
       bool success = true;
       String message = 'Ocurrio un error';
       try {
         responseData = json.decode(response.body);
+        if (responseData['status'] == true) {
+          success = true;
+          message = 'Se envió la alerta';
+          if (type == 1) {
+            _activeAlert = false;
+          }else{
+            _activeAlert = true;
+          }
+        } else {
+          success = false;
+          message = responseData['message'];
+        }
       } catch (error) {
         success = false;
         _isLoading = false;
         notifyListeners();
         message = error.toString();
-        return {'success': success, 'message': message};
-      }
-
-      if (responseData['status'] == true) {
-        success = true;
-        message = 'Se envió la alerta';
-      } else {
-        success = false;
-        message = responseData['message'];
       }
 
       _isLoading = false;
@@ -272,15 +274,28 @@ class UserModel extends ConnectedPalsModel {
     _authenticatedUser = value;
   }
 
+  ///
+  ///login
+  ///@version 0.9.7
+  ///Login del app
+  ///
   Future<Map<String, dynamic>> login(
       String email, String password, String osDevice, String idDevice) async {
-    final http.Response response =
-        await http.post(config.apiUrl + '/users/login', body: {
-      "email": email,
-      "password": password,
-      'osdevice': osDevice,
-      'id_device': idDevice
-    });
+    http.Response response;
+    try {
+      response = await http.post(config.apiUrl + '/users/login', body: {
+        "email": email,
+        "password": password,
+        'osdevice': osDevice,
+        'id_device': idDevice
+      });
+    } catch (err) {
+      print("Error en login" + err.toString());
+      return {
+        'success': false,
+        'message': "No tienes conexión con el servidor"
+      };
+    }
 
     final Map<String, dynamic> responseData = json.decode(response.body);
 
@@ -381,7 +396,7 @@ class UserModel extends ConnectedPalsModel {
           phone: mobileNum,
           token: token,
           idDevice: idDevice);
-    }else{
+    } else {
       _authenticatedUser = null;
       _success = false;
     }
@@ -421,7 +436,6 @@ class UserModel extends ConnectedPalsModel {
     _isLoading = false;
     notifyListeners();
   }
-
 }
 
 class UtilityModel extends ConnectedPalsModel {

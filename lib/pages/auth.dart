@@ -97,7 +97,7 @@ class _AuthPageState extends State<AuthPage> {
         .then((response) {
       print("Desde login R" + response.toString());
       if (response['success']) {
-        Navigator.pushReplacementNamed(context, '/button');
+        Navigator.pushReplacementNamed(context, '/');
       } else {
         showDialog(
           context: context,
@@ -126,7 +126,7 @@ class _AuthPageState extends State<AuthPage> {
     final double targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        title: Text('PAL'),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -154,7 +154,7 @@ class _AuthPageState extends State<AuthPage> {
                           MainModel model) {
                         return RaisedButton(
                           textColor: Colors.white,
-                          child: Text('LOGIN'),
+                          child: Text('Entrar'),
                           onPressed: () => _submitForm(model.login),
                         );
                       },

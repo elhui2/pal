@@ -1,81 +1,98 @@
+import 'package:scoped_model/scoped_model.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../../models/location_data.dart';
+import 'package:location/location.dart' as geoloc;
 
-/**
- * Gmap
- * @version 0.7
- * Mapa de google nativo
- */
+import '../../scoped-models/main.dart';
+
+///
+/// Gmap
+/// @version 0.9.7
+/// Mapa de google nativo
+///
 class Gmap extends StatefulWidget {
+  final MainModel model;
   final _GmapState state = _GmapState();
+
+  Gmap(this.model);
 
   @override
   State<StatefulWidget> createState() {
     return state;
   }
-
-  void userLocation(LocationData currentLocation) async {
-    if (state.mounted && currentLocation != null) {
-      state.userLocation(currentLocation);
-    }
-  }
 }
 
+
 class _GmapState extends State<Gmap> {
+  final location = geoloc.Location();
   GoogleMapController mapController;
 
-  LatLng currentPosition;
-  Marker currentMarker;
-  final Set<Marker> _markers = {};
+  LatLng currentPosition = new LatLng(19.432778, -99.133222);
+  Set<Marker> _markers = new Set<Marker>();
+
+  @override
+  void initState() {
+    super.initState();
+    print("Gmap initState");
+    location.hasPermission().then((permisions) {
+      print("Init hasPermission $permisions");
+      if (permisions == true) {
+        location.onLocationChanged().listen((currentLocation) {
+          print(
+              "Init onLocationChanged ${currentLocation.latitude},${currentLocation.longitude}");
+          widget.model.setCurrentLocation(
+              currentLocation.latitude, currentLocation.longitude);
+              currentPosition = new LatLng(currentLocation.latitude, currentLocation.longitude);
+              centerMarker(currentPosition);
+        });
+      }
+    });
+  }
 
   @override
   void setState(fn) {
+    print("Gmap setState");
     super.setState(fn);
   }
 
-  static CameraPosition mainCamara =
-      new CameraPosition(target: LatLng(23.6345005, -102.5527878), zoom: 6.0);
-
   @override
   Widget build(BuildContext context) {
-    return GoogleMap(
-      mapType: MapType.normal,
-      initialCameraPosition: mainCamara,
-      onMapCreated: (GoogleMapController controller) {
-        mapController = controller;
+    return ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget child, MainModel model) {
+        return GoogleMap(
+            mapType: MapType.normal,
+            initialCameraPosition:
+                new CameraPosition(target: currentPosition, zoom: 14.0),
+            onMapCreated: (GoogleMapController controller) {
+              mapController = controller;
+            },
+            markers: _markers);
       },
-      markers: _markers
     );
   }
 
-  void userLocation(LocationData location) {
-    if (location != null && mapController!=null) {
-      currentPosition = new LatLng(location.latitude, location.longitude);
-      setState(() {
-        currentMarker = new Marker(
-          // This marker id can be anything that uniquely identifies each marker.
-          markerId: MarkerId("current_position"),
-          position: currentPosition,
-          infoWindow: InfoWindow(
-            title: 'Nuestra Ubicacion',
-            snippet: 'Se actualiza automaticamente',
-          ),
-          icon: BitmapDescriptor.defaultMarker,
-        );
-        _markers.add(currentMarker);
-        centerMap(currentPosition);
-      });
-    }
-  }
-
-  void centerMap(LatLng position) async {
-    mapController.animateCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(
-        bearing: 0,
-        target: position,
-        zoom: 17.0,
+  void centerMarker(LatLng currentPosition) async {
+    _markers = new Set<Marker>();
+    Marker currentMarker = new Marker(
+      // This marker id can be anything that uniquely identifies each marker.
+      markerId: MarkerId("currentPosition"),
+      position: currentPosition,
+      infoWindow: InfoWindow(
+        title: 'Nuestra Ubicacion',
+        snippet: 'Se actualiza automaticamente',
       ),
-    ));
+      icon: BitmapDescriptor.defaultMarker,
+    );
+    _markers.add(currentMarker);
+
+    if (mapController != null) {
+      mapController.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(
+          bearing: 0,
+          target: currentPosition,
+          zoom: 15.0,
+        ),
+      ));
+    }
   }
 }

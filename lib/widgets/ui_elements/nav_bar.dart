@@ -20,7 +20,7 @@ class NavBar extends StatelessWidget {
             leading: Icon(Icons.warning),
             title: Text('Inicio'),
             onTap: () {
-              Navigator.pushReplacementNamed(context, '/button');
+              Navigator.pushReplacementNamed(context, '/');
             },
           ),
           ListTile(
