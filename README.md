@@ -1,4 +1,4 @@
-# pal Version 0.9
+# pal Version 1.0
 
 Alarma PAL para iOS y Android
 

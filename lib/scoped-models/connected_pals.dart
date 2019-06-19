@@ -12,7 +12,7 @@ import '../models/location_data.dart';
 
 /**
  * ConnectedPalsModel
- * @version 0.9.7
+ * @version 1.0
  * @author Daniel Huidobro <daniel@rebootproject.mx>
  * Modelo principal del app
  */
@@ -67,47 +67,58 @@ class AlertsModel extends ConnectedPalsModel {
     notifyListeners();
   }
 
+  ///
   ///SendAlert
-  ///@version 0.9.5
+  ///@version 1.0
   ///Envia una alerta al servidor
   ///
-  Future<Map<String, dynamic>> sendAlert(int type) {
+  Future<Map<String, dynamic>> sendAlert(int type) async {
     _isLoading = true;
     notifyListeners();
-    return http.post(config.apiUrl + '/alerts', body: {
-      'device': _authenticatedUser.idDevice,
-      'code_panic': type.toString(),
-      'lat': _userCurrentLocation.latitude.toString(),
-      'lng': _userCurrentLocation.longitude.toString()
-    }).then((http.Response response) {
-      Map<String, dynamic> responseData;
-      bool success = true;
-      String message = 'Ocurrio un error';
-      try {
-        responseData = json.decode(response.body);
-        if (responseData['status'] == true) {
-          success = true;
-          message = 'Se envió la alerta';
-          if (type == 1) {
-            _activeAlert = false;
-          }else{
-            _activeAlert = true;
-          }
+    bool success = true;
+    String message = 'Ocurrio un error';
+
+    http.Response _response;
+    Map<String, dynamic> responseData;
+
+    try {
+
+      _response = await http.post(config.apiUrl + '/alerts', body: {
+        'device': _authenticatedUser.idDevice,
+        'code_panic': type.toString(),
+        'lat': _userCurrentLocation.latitude.toString(),
+        'lng': _userCurrentLocation.longitude.toString()
+      });
+
+      responseData = json.decode(_response.body);
+
+      if (responseData['status'] == true) {
+
+        success = true;
+        message = 'Se envió la alerta';
+
+        if (type == 1) {
+          _activeAlert = false;
         } else {
-          success = false;
-          message = responseData['message'];
+          _activeAlert = true;
         }
-      } catch (error) {
+
+      } else {
         success = false;
-        _isLoading = false;
-        notifyListeners();
-        message = error.toString();
+        message = responseData['message'];
       }
 
-      _isLoading = false;
-      notifyListeners();
-      return {'success': success, 'message': message};
-    });
+    } catch (_ex) {
+
+      print(_ex.toString());
+      success = false;
+      message = 'No tienes conexion con el servidor';
+
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return {'success': success, 'message': message};
   }
 
   List<Alert> get allAlerts {
@@ -276,14 +287,14 @@ class UserModel extends ConnectedPalsModel {
 
   ///
   ///login
-  ///@version 0.9.7
+  ///@version 1.0
   ///Login del app
   ///
   Future<Map<String, dynamic>> login(
       String email, String password, String osDevice, String idDevice) async {
-    http.Response response;
+    http.Response _response;
     try {
-      response = await http.post(config.apiUrl + '/users/login', body: {
+      _response = await http.post(config.apiUrl + '/users/login', body: {
         "email": email,
         "password": password,
         'osdevice': osDevice,
@@ -297,7 +308,7 @@ class UserModel extends ConnectedPalsModel {
       };
     }
 
-    final Map<String, dynamic> responseData = json.decode(response.body);
+    final Map<String, dynamic> responseData = json.decode(_response.body);
 
     bool hasError = true;
     String message = 'Ocurrio un error';
