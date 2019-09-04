@@ -3,7 +3,6 @@
 Alarma PAL para iOS y Android
 
 ## Descripcion
-
 Proyecto en flutter para Alertas de Seguridad en iOS y Android
 
 ### Datos importantes del sistema 
@@ -23,11 +22,4 @@ Todos los usuarios pueden tener hasta tres referidos con estas relaciones:
 
 ### Cambios en esta version
 
-- El boton de ubicacion ahora funcionara para revisar los parametros del gps
-- Ahora los pinches mapas de iOS no jalan :(
-- Alerta activos con el hearthbeat
-- Procesar la ubicacion desde alerts por el listener
-- Perfil de usuario cambiar contraseña
-- Revisar la edicion de referidos con los datos de web
-- Al presionar el boton del gps, actualizar el mapa
-- Revisar Switch de botones
+- Mejoras de UI en pantalla de alertas

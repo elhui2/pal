@@ -9,12 +9,12 @@ import '../widgets/ui_elements/nav_bar.dart';
 import '../widgets/location/gmap.dart';
 import '../widgets/ui_elements/buttons_alert.dart';
 
-/**
- * alerts
- * @version 0.9.7
- * @author Daniel Huidobro <daniel@rebootproject.mx>
- * Boton de alerta del app
- */
+///
+/// alerts
+/// @version 1.1
+/// @author Daniel Huidobro <daniel@rebootproject.mx>
+/// Boton de alerta del app
+///
 class Alerts extends StatefulWidget {
   final Config config = Config();
   final MainModel model;
@@ -106,18 +106,38 @@ class _AlertsState extends State<Alerts> {
           children: <Widget>[
             Container(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 3,
-              child: Gmap(model),
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 9,
+              height: MediaQuery.of(context).size.height / 16,
               color: Colors.deepOrange,
               child: Center(
                 child: Text(
                   "Revisa tu ubicación en el mapa",
-                  style: TextStyle(color: Colors.white, fontSize: 18),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
                 ),
+              ),
+            ),
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height / 3,
+              child: Gmap(model),
+            ),
+            Container(
+              margin: EdgeInsets.only(top: 18,bottom: 18),
+              width: MediaQuery.of(context).size.width / 1.2,
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(bottom: 18),
+                    height: 1,
+                    color: Colors.deepOrange,
+                  ),
+                  Text(
+                    "Selecciona un tipo de alerta",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  )
+                ],
               ),
             ),
             Container(

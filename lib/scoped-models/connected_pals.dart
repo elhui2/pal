@@ -307,7 +307,7 @@ class UserModel extends ConnectedPalsModel {
         'message': "No tienes conexión con el servidor"
       };
     }
-
+    print(_response.body);
     final Map<String, dynamic> responseData = json.decode(_response.body);
 
     bool hasError = true;
