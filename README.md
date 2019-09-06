@@ -1,4 +1,4 @@
-# pal Version 1.0
+# pal Version 1.1
 
 Alarma PAL para iOS y Android
 
@@ -16,10 +16,10 @@ Todos los usuarios pueden tener hasta tres referidos con estas relaciones:
 ### TODO
 - Seguridad por token al consumir el API
 - Comprobar Token
-- Cambiar el Icono de alerta de seguridad
 - Verificar cuando las mensajes son heartbeat y tracks y no mostrar alerta
 
 
 ### Cambios en esta version
 
+- Cambiar el Icono de alerta de seguridad
 - Mejoras de UI en pantalla de alertas

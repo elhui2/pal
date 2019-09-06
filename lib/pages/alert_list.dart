@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import '../scoped-models/main.dart';
 
+///
+/// AlertList
+/// @version 1.1
+/// @author Daniel Huidobro daniel@rebootproject.mx
+/// 
 class AlertList extends StatefulWidget {
   final MainModel model;
   AlertList(this.model);
@@ -35,7 +42,12 @@ class _AlertListState extends State<AlertList> {
               child: Column(
                 children: <Widget>[
                   ListTile(
-                    title: Text(model.allAlerts[index].registerDate),
+                    title: Text(
+                      formatDate(model.allAlerts[index].registerDate),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
+                    ),
                     subtitle:
                         Text('${model.allAlerts[index].status.toString()}'),
                   ),
@@ -48,5 +60,13 @@ class _AlertListState extends State<AlertList> {
         );
       },
     );
+  }
+
+  formatDate(String date) {
+    var nowTim = DateTime.parse(date);
+    String dateformat =
+        new DateFormat("d 'de' MMMM 'de' yyyy | H:mm", "es").format(nowTim);
+    print(dateformat);
+    return dateformat;
   }
 }

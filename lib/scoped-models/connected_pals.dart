@@ -38,6 +38,7 @@ class AlertsModel extends ConnectedPalsModel {
         .get(config.apiUrl + '/users_alerts/get/${_authenticatedUser.idUser}')
         .then((http.Response response) {
       final Map<String, dynamic> alertListData = jsonDecode(response.body);
+      print(response.body);
       if (alertListData['status'] == false) {
         _isLoading = false;
         notifyListeners();
@@ -82,7 +83,6 @@ class AlertsModel extends ConnectedPalsModel {
     Map<String, dynamic> responseData;
 
     try {
-
       _response = await http.post(config.apiUrl + '/alerts', body: {
         'device': _authenticatedUser.idDevice,
         'code_panic': type.toString(),
@@ -93,7 +93,6 @@ class AlertsModel extends ConnectedPalsModel {
       responseData = json.decode(_response.body);
 
       if (responseData['status'] == true) {
-
         success = true;
         message = 'Se envió la alerta';
 
@@ -102,18 +101,14 @@ class AlertsModel extends ConnectedPalsModel {
         } else {
           _activeAlert = true;
         }
-
       } else {
         success = false;
         message = responseData['message'];
       }
-
     } catch (_ex) {
-
       print(_ex.toString());
       success = false;
       message = 'No tienes conexion con el servidor';
-
     }
 
     _isLoading = false;

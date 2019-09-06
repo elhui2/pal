@@ -7,7 +7,6 @@ import '../scoped-models/main.dart';
 import '../config.dart';
 import '../widgets/ui_elements/nav_bar.dart';
 import '../widgets/location/gmap.dart';
-import '../widgets/ui_elements/buttons_alert.dart';
 
 ///
 /// alerts
@@ -105,39 +104,75 @@ class _AlertsState extends State<Alerts> {
         body: Column(
           children: <Widget>[
             Container(
-              width: MediaQuery.of(context).size.width,
+              width: MediaQuery.of(context).size.width * 0.8,
               height: MediaQuery.of(context).size.height / 16,
-              color: Colors.deepOrange,
               child: Center(
-                child: Text(
-                  "Revisa tu ubicación en el mapa",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold),
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      child: Icon(
+                        Icons.map,
+                        color: Colors.deepOrange,
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 8),
+                      child: Text(
+                        "Revisa tu ubicación en el mapa",
+                        style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
             Container(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 3,
+              height: MediaQuery.of(context).size.height / 3.7,
               child: Gmap(model),
             ),
             Container(
-              margin: EdgeInsets.only(top: 18,bottom: 18),
+              margin: EdgeInsets.only(top: 18),
               width: MediaQuery.of(context).size.width / 1.2,
               child: Column(
                 children: <Widget>[
                   Container(
-                    margin: EdgeInsets.only(bottom: 18),
-                    height: 1,
-                    color: Colors.deepOrange,
-                  ),
-                  Text(
-                    "Selecciona un tipo de alerta",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    width: MediaQuery.of(context).size.width * 0.65,
+                    child: Center(
+                      child: Row(
+                        children: <Widget>[
+                          Container(
+                            child: Icon(
+                              Icons.notifications,
+                              color: Colors.deepOrange,
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(left: 8),
+                            child: Text(
+                              "Selecciona tipo de alerta",
+                              style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   )
                 ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(top: 18, bottom: 18),
+              width: MediaQuery.of(context).size.width / 1.2,
+              child: Text(
+                "De preferencia, revisa que tu ubicación en el mapa se a la correcta y presiona un tipo de alerta",
+                style: TextStyle(color: Colors.black54, fontSize: 14),
               ),
             ),
             Container(
@@ -185,14 +220,13 @@ class _AlertsState extends State<Alerts> {
                                 ),
                               ),
                               Container(
-                                child: IconButton(
-                                  iconSize:
-                                      MediaQuery.of(context).size.width / 3,
-                                  color: Colors.blue,
-                                  icon: Icon(Icons.security),
+                                width: MediaQuery.of(context).size.width / 3,
+                                child: FlatButton(
                                   onPressed: () {
                                     _sendAlert(3, model.sendAlert);
                                   },
+                                  padding: EdgeInsets.all(0.0),
+                                  child: Image.asset('assets/bt_police.png'),
                                 ),
                               )
                             ])),
@@ -200,34 +234,55 @@ class _AlertsState extends State<Alerts> {
                           Container(
                             width: MediaQuery.of(context).size.width / 2,
                             child: Center(
-                                child: Column(children: <Widget>[
-                              Container(
-                                padding: EdgeInsets.all(10),
-                                child: Text(
-                                  "Médico",
-                                  style: TextStyle(
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18),
+                              child: Column(children: <Widget>[
+                                Container(
+                                  padding: EdgeInsets.all(10),
+                                  child: Text(
+                                    "Médico",
+                                    style: TextStyle(
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18),
+                                  ),
                                 ),
-                              ),
-                              Container(
-                                child: IconButton(
-                                  iconSize:
-                                      MediaQuery.of(context).size.width / 3,
-                                  color: Colors.red,
-                                  icon: Icon(Icons.add_circle_outline),
-                                  onPressed: () {
-                                    _sendAlert(4, model.sendAlert);
-                                  },
+                                Container(
+                                  width: MediaQuery.of(context).size.width / 3,
+                                  child: FlatButton(
+                                    onPressed: () {
+                                      _sendAlert(4, model.sendAlert);
+                                    },
+                                    padding: EdgeInsets.all(0.0),
+                                    child: Image.asset('assets/bt_medic.png'),
+                                  ),
                                 ),
-                              )
-                            ])),
+                              ]),
+                            ),
                           ),
                         ],
                       ),
               ),
             ),
+            Container(
+              width: MediaQuery.of(context).size.width * .80,
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(bottom: 6),
+                    height: 1,
+                    color: Colors.black26,
+                  ),
+                  Text(
+                    "Copyright Reset 2000",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w100,
+                      color: Colors.deepOrange,
+                      // fontStyle: FontStyle.italic
+                    ),
+                  )
+                ],
+              ),
+            )
           ],
         ),
       );
