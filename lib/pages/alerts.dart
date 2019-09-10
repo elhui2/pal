@@ -28,14 +28,10 @@ class Alerts extends StatefulWidget {
 
 class _AlertsState extends State<Alerts> {
   final location = geoloc.Location();
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  //Objetos dinamicos, esto es una marranada
-  BuildContext scaffoldContext;
 
   @override
   initState() {
     super.initState();
-    print("Alerts initState");
   }
 
   void _sendAlert(int type, Function alert) async {
@@ -66,7 +62,7 @@ class _AlertsState extends State<Alerts> {
     return ScopedModelDescendant<MainModel>(
         builder: (BuildContext context, Widget child, MainModel model) {
       return Scaffold(
-        key: _scaffoldKey,
+        // key: _scaffoldKey,
         drawer: NavBar(model),
         appBar: AppBar(
           title: Text('Alertas'),

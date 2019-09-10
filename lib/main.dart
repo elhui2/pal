@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pal/database/alerts_db.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import './config.dart';
@@ -7,6 +8,7 @@ import './pages/alerts_admin.dart';
 import './pages/refers_admin.dart';
 import './pages/alerts.dart';
 import './scoped-models/main.dart';
+import 'models/alert.dart';
 
 ///
 /// main.dart
@@ -30,6 +32,9 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
+    AlertsDb.db.getAllAlerts().then((alerts) {
+      print("Estado del alerta -> "+alerts[0].status);
+    });
     _model.autoAuthenticate().then((success) {
       if (success) {
         _model.checkToken();

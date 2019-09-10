@@ -39,4 +39,12 @@ class AlertsDb {
     var res = await db.insert("alerts", newAlert.toSqlMap());
     return res;
   }
+
+  Future<List<Alert>> getAllAlerts() async {
+    final db = await database;
+    var res = await db.query("alerts");
+    List<Alert> list =
+        res.isNotEmpty ? res.map((c) => Alert.fromMap(c)).toList() : [];
+    return list;
+  }
 }

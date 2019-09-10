@@ -33,4 +33,13 @@ class Alert {
       'register_date': registerDate
     };
   }
+
+  factory Alert.fromMap(Map<String, dynamic> json) => new Alert(
+        idAlert: json["id_alert"],
+        idDevice: json["id_device"],
+        idUser: json["id_user"],
+        status: json["status"],
+        type: json["type"],
+        registerDate: json["register_date"],
+      );
 }
