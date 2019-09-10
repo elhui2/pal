@@ -49,7 +49,7 @@ class _AlertListState extends State<AlertList> {
                           fontWeight: FontWeight.bold),
                     ),
                     subtitle:
-                        Text('${model.allAlerts[index].status.toString()}'),
+                        Text('${model.allAlerts[index].type.toString()} | ${model.allAlerts[index].status.toString()}'),
                   ),
                   Divider()
                 ],
@@ -64,6 +64,7 @@ class _AlertListState extends State<AlertList> {
 
   formatDate(String date) {
     var nowTim = DateTime.parse(date);
+    initializeDateFormatting("es");
     String dateformat =
         new DateFormat("d 'de' MMMM 'de' yyyy | H:mm", "es").format(nowTim);
     print(dateformat);

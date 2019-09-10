@@ -41,25 +41,23 @@ class _AlertsState extends State<Alerts> {
   void _sendAlert(int type, Function alert) async {
     alert(type).then((response) {
       print("Respuesta de la alerta en UI $response");
-      if (!response["success"]) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Alerta!'),
-              content: Text(response['message']),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text('Okay'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            );
-          },
-        );
-      }
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Alerta!'),
+            content: Text(response['message']),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Okay'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        },
+      );
     });
   }
 

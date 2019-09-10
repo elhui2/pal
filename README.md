@@ -14,10 +14,10 @@ Todos los usuarios pueden tener hasta tres referidos con estas relaciones:
 - otro
 
 ### TODO
+- Offline, si no hay internet el alerta seguarda para siguiente conexion[TRABAJANDO]
 - Seguridad por token al consumir el API
 - Comprobar Token
 - Verificar cuando las mensajes son heartbeat y tracks y no mostrar alerta
-
 
 ### Cambios en esta version
 

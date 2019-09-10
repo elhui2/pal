@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
+import 'package:pal/database/alerts_db.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,12 +11,12 @@ import '../models/alert.dart';
 import '../models/user.dart';
 import '../models/location_data.dart';
 
-/**
- * ConnectedPalsModel
- * @version 1.0
- * @author Daniel Huidobro <daniel@rebootproject.mx>
- * Modelo principal del app
- */
+///
+/// ConnectedPalsModel
+/// @version 1.1
+/// @author Daniel Huidobro <daniel@rebootproject.mx>
+/// Modelo principal del app
+///
 class ConnectedPalsModel extends Model {
   final Config config = new Config();
   List<Alert> _alerts = [];
@@ -28,31 +29,41 @@ class ConnectedPalsModel extends Model {
 }
 
 class AlertsModel extends ConnectedPalsModel {
-  /**
-   * fetchAlerts
-   * Listar referidos
-   */
+  ///
+  /// fetchAlerts
+  /// @version 0.8
+  /// @author Daniel Huidobro daniel@rebootproject.mx
+  /// Listar referidos
+  ///
   Future<Null> fetchAlerts() {
     _isLoading = true;
     return http
         .get(config.apiUrl + '/users_alerts/get/${_authenticatedUser.idUser}')
         .then((http.Response response) {
+      //print(config.apiUrl + '/users_alerts/get/${_authenticatedUser.idUser}');
       final Map<String, dynamic> alertListData = jsonDecode(response.body);
-      print(response.body);
+      //print(response.body);
+
       if (alertListData['status'] == false) {
         _isLoading = false;
         notifyListeners();
         return;
       }
+
       final List<Alert> fetchAlertList = [];
+
       alertListData['response'].forEach((dynamic alertData) {
         final Alert alert = Alert(
           idAlert: int.parse(alertData['id_alert']),
+          idDevice: alertData['id_device'],
+          idUser: int.parse(alertData['id_user']),
           status: alertData['status'],
+          type: alertData['type'],
           registerDate: alertData['register_date'],
         );
         fetchAlertList.add(alert);
       });
+
       _alerts = fetchAlertList;
       _isLoading = false;
       notifyListeners();
@@ -69,18 +80,22 @@ class AlertsModel extends ConnectedPalsModel {
   }
 
   ///
-  ///SendAlert
-  ///@version 1.0
-  ///Envia una alerta al servidor
+  /// SendAlert
+  /// @version 1.1
+  /// Envia una alerta al servidor
   ///
   Future<Map<String, dynamic>> sendAlert(int type) async {
     _isLoading = true;
     notifyListeners();
-    bool success = true;
-    String message = 'Ocurrio un error';
+    bool success = false;
+    String message = '';
 
     http.Response _response;
     Map<String, dynamic> responseData;
+
+    if (type == 3 || type == 4) {
+      _activeAlert = true;
+    }
 
     try {
       _response = await http.post(config.apiUrl + '/alerts', body: {
@@ -91,24 +106,27 @@ class AlertsModel extends ConnectedPalsModel {
       });
 
       responseData = json.decode(_response.body);
-
-      if (responseData['status'] == true) {
-        success = true;
-        message = 'Se envió la alerta';
-
-        if (type == 1) {
-          _activeAlert = false;
-        } else {
-          _activeAlert = true;
-        }
-      } else {
-        success = false;
-        message = responseData['message'];
-      }
     } catch (_ex) {
-      print(_ex.toString());
+      AlertsDb.db.newAlert(new Alert(
+          idAlert: 0,
+          idDevice: _authenticatedUser.idDevice,
+          idUser: _authenticatedUser.idUser,
+          status: "sync",
+          type: type.toString(),
+          registerDate: ""));
+      print("Error en alerta ->" + _ex.toString());
+      return {
+        'success': false,
+        'message': 'Revisa tu conexión a internet o intentalo más tarde'
+      };
+    }
+
+    if (responseData['status'] == true) {
+      success = true;
+      message = 'Se envió la alerta';
+    } else {
       success = false;
-      message = 'No tienes conexion con el servidor';
+      message = responseData['message'];
     }
 
     _isLoading = false;
@@ -253,12 +271,12 @@ class RefersModel extends ConnectedPalsModel {
   }
 }
 
-/**
- * UserModel
- * @version 0.7
- * Modelo del usuario
- * TODO:Ver los warninds de todos los modelos
- */
+///
+/// UserModel
+/// @version 0.7
+/// Modelo del usuario
+/// TODO:Ver los warninds de todos los modelos
+///
 class UserModel extends ConnectedPalsModel {
   void setCurrentLocation(double lat, double lng) {
     if (lat != null && lat > 0) {
@@ -413,25 +431,32 @@ class UserModel extends ConnectedPalsModel {
 
   ///
   /// checkToken
-  /// @version 0.9.5
+  /// @version 0.1.1
   /// Verificara el token del usuario y lo renueva si es necesario
   /// TODO: Verificar token de acceso en api y app
+  ///
   void checkToken() async {
     _isLoading = true;
     notifyListeners();
-    final http.Response response =
-        await http.post(config.apiUrl + '/alerts', body: {
-      "device": _authenticatedUser.idDevice,
-      "token": _authenticatedUser.token,
-      'code_panic': 2.toString(), //Hearbeat
-      'lat': (_userCurrentLocation == null)
-          ? 0.0.toString()
-          : _userCurrentLocation.latitude.toString(),
-      'lng': (_userCurrentLocation == null)
-          ? 0.0.toString()
-          : _userCurrentLocation.longitude.toString(),
-    });
-    final Map<String, dynamic> responseData = json.decode(response.body);
+    http.Response _response;
+    try {
+      _response = await http.post(config.apiUrl + '/alerts', body: {
+        "device": _authenticatedUser.idDevice,
+        "token": _authenticatedUser.token,
+        'code_panic': 2.toString(), //Hearbeat
+        'lat': (_userCurrentLocation == null)
+            ? 0.0.toString()
+            : _userCurrentLocation.latitude.toString(),
+        'lng': (_userCurrentLocation == null)
+            ? 0.0.toString()
+            : _userCurrentLocation.longitude.toString(),
+      });
+    } catch (err) {
+      print("checkToken -> No hay conexión con el servidor");
+      return;
+    }
+
+    final Map<String, dynamic> responseData = json.decode(_response.body);
 
     if (responseData['status'] == true) {
       //TODO: Renovar el token cada 24 hrs
