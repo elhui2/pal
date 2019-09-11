@@ -32,8 +32,14 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    AlertsDb.db.getAllAlerts().then((alerts) {
-      print("Estado del alerta -> "+alerts[0].status);
+    AlertsDb.db.getStatusAlert().then((alert) {
+      if (alert == null) {
+      } else {
+        print("ID -> ${alert.idAlert}");
+        print("Status -> ${alert.status}");
+        _model.setActiveAlert(true);
+        _model.syncAlert(alert);
+      }
     });
     _model.autoAuthenticate().then((success) {
       if (success) {

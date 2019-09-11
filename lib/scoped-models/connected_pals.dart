@@ -97,6 +97,25 @@ class AlertsModel extends ConnectedPalsModel {
       _activeAlert = true;
     }
 
+    if (type == 1) {
+      AlertsDb.db.getStatusAlert().then((alert) {
+        if (alert == null) {
+        } else {
+          print("ID cancel -> ${alert.idAlert}");
+          print("Status cancel -> ${alert.status}");
+          setActiveAlert(false);
+          Alert syncAlert = Alert(
+              idAlert: alert.idAlert,
+              idDevice: alert.idDevice,
+              idUser: alert.idUser,
+              type: alert.type,
+              status: "complete",
+              registerDate: "");
+          AlertsDb.db.updateAlert(syncAlert);
+        }
+      });
+    }
+
     try {
       _response = await http.post(config.apiUrl + '/alerts', body: {
         'device': _authenticatedUser.idDevice,
@@ -107,13 +126,16 @@ class AlertsModel extends ConnectedPalsModel {
 
       responseData = json.decode(_response.body);
     } catch (_ex) {
-      AlertsDb.db.newAlert(new Alert(
-          idAlert: 0,
-          idDevice: _authenticatedUser.idDevice,
-          idUser: _authenticatedUser.idUser,
-          status: "sync",
-          type: type.toString(),
-          registerDate: ""));
+      if (type == 3 || type == 4) {
+        print("Estoy guardando un alerta nueva");
+        AlertsDb.db.newAlert(new Alert(
+            //idAlert: 0,
+            idDevice: _authenticatedUser.idDevice,
+            idUser: _authenticatedUser.idUser,
+            status: "sync",
+            type: type.toString(),
+            registerDate: ""));
+      }
       print("Error en alerta ->" + _ex.toString());
       return {
         'success': false,
@@ -132,6 +154,33 @@ class AlertsModel extends ConnectedPalsModel {
     _isLoading = false;
     notifyListeners();
     return {'success': success, 'message': message};
+  }
+
+  Future syncAlert(Alert alert) async {
+    http.Response _response;
+    Map<String, dynamic> responseData;
+
+    try {
+      _response = await http.post(config.apiUrl + '/alerts', body: {
+        'device': _authenticatedUser.idDevice,
+        'code_panic': alert.type.toString(),
+        'lat': _userCurrentLocation.latitude.toString(),
+        'lng': _userCurrentLocation.longitude.toString(),
+        'register_device': alert.registerDate
+      });
+
+      responseData = json.decode(_response.body);
+    } catch (_ex) {
+      print("syncAlert err -> " + _ex.toString());
+      return;
+    }
+
+    if (responseData['status'] == true) {
+      Alert syncAlert = new Alert(idAlert: alert.idAlert, status: "complete");
+      AlertsDb.db.updateAlert(syncAlert);
+    } else {
+      print("No se pudo sincronizar la alerta");
+    }
   }
 
   List<Alert> get allAlerts {

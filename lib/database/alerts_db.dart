@@ -27,7 +27,7 @@ class AlertsDb {
       path,
       onCreate: (db, version) async {
         return db.execute(
-          "CREATE TABLE alerts(id_alert INTEGER PRIMARY KEY, id_device TEXT, id_user INTEGER, status TEXT, type TEXT, register_date TEXT)",
+          "CREATE TABLE alerts(id_alert INTEGER PRIMARY KEY AUTOINCREMENT, id_device TEXT, id_user INTEGER, status TEXT, type TEXT, register_date TEXT)",
         );
       },
       version: 1,
@@ -40,11 +40,28 @@ class AlertsDb {
     return res;
   }
 
-  Future<List<Alert>> getAllAlerts() async {
+  updateAlert(Alert alert) async {
     final db = await database;
-    var res = await db.query("alerts");
+    var res = await db.update("alerts", alert.toSqlMap(),
+        where: "id_alert = ?", whereArgs: [alert.idAlert]);
+    return res;
+  }
+
+  Future<Alert> getStatusAlert() async {
+    final db = await database;
+    var res =
+        await db.rawQuery("SELECT * FROM alerts WHERE status='sync' LIMIT 1");
     List<Alert> list =
         res.isNotEmpty ? res.map((c) => Alert.fromMap(c)).toList() : [];
-    return list;
+    if (list.length > 0) {
+      return list[0];
+    } else {
+      return null;
+    }
+  }
+
+  deleteTable() async {
+    final db = await database;
+    db.rawDelete("DELETE FROM alerts");
   }
 }

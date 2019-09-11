@@ -31,6 +31,8 @@ class _AlertsState extends State<Alerts> {
 
   @override
   initState() {
+    // AlertsDb.db.deleteTable();
+
     super.initState();
   }
 
