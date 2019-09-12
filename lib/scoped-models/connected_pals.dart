@@ -79,6 +79,47 @@ class AlertsModel extends ConnectedPalsModel {
     notifyListeners();
   }
 
+  Future<Map<String, dynamic>> cancelAlert() async {
+    _isLoading = true;
+    notifyListeners();
+    http.Response _response;
+    Map<String, dynamic> responseData;
+    _activeAlert = false;
+    notifyListeners();
+    AlertsDb.db.getStatusAlert().then((alert) {
+      if (alert == null) {
+      } else {
+        print("ID cancel -> ${alert.idAlert}");
+        print("Status cancel -> ${alert.status}");
+        Alert syncAlert = Alert(
+            idAlert: alert.idAlert,
+            idDevice: alert.idDevice,
+            idUser: alert.idUser,
+            type: alert.type,
+            status: "complete",
+            registerDate: "");
+        AlertsDb.db.updateAlert(syncAlert);
+      }
+    });
+
+    try {
+      _response = await http.post(config.apiUrl + '/alerts/cancel', body: {
+        'device': _authenticatedUser.idDevice,
+        'lat': _userCurrentLocation.latitude.toString(),
+        'lng': _userCurrentLocation.longitude.toString()
+      });
+
+      responseData = json.decode(_response.body);
+    } catch (_ex) {
+      print("Error en alerta ->" + _ex.toString());
+      return {
+        'success': false,
+        'message':
+            'No tienes internet, el alerta se actualizará en el dispositivo para tu siguiente conexión'
+      };
+    }
+  }
+
   ///
   /// SendAlert
   /// @version 1.1
@@ -95,25 +136,13 @@ class AlertsModel extends ConnectedPalsModel {
 
     if (type == 3 || type == 4) {
       _activeAlert = true;
-    }
-
-    if (type == 1) {
-      AlertsDb.db.getStatusAlert().then((alert) {
-        if (alert == null) {
-        } else {
-          print("ID cancel -> ${alert.idAlert}");
-          print("Status cancel -> ${alert.status}");
-          setActiveAlert(false);
-          Alert syncAlert = Alert(
-              idAlert: alert.idAlert,
-              idDevice: alert.idDevice,
-              idUser: alert.idUser,
-              type: alert.type,
-              status: "complete",
-              registerDate: "");
-          AlertsDb.db.updateAlert(syncAlert);
-        }
-      });
+      AlertsDb.db.newAlert(new Alert(
+          //idAlert: 0,
+          idDevice: _authenticatedUser.idDevice,
+          idUser: _authenticatedUser.idUser,
+          status: "sync",
+          type: type.toString(),
+          registerDate: ""));
     }
 
     try {
@@ -126,20 +155,11 @@ class AlertsModel extends ConnectedPalsModel {
 
       responseData = json.decode(_response.body);
     } catch (_ex) {
-      if (type == 3 || type == 4) {
-        print("Estoy guardando un alerta nueva");
-        AlertsDb.db.newAlert(new Alert(
-            //idAlert: 0,
-            idDevice: _authenticatedUser.idDevice,
-            idUser: _authenticatedUser.idUser,
-            status: "sync",
-            type: type.toString(),
-            registerDate: ""));
-      }
       print("Error en alerta ->" + _ex.toString());
       return {
         'success': false,
-        'message': 'Revisa tu conexión a internet o intentalo más tarde'
+        'message':
+            'No tienes internet, el alerta se actualizará en el dispositivo para tu siguiente conexión'
       };
     }
 
@@ -176,7 +196,13 @@ class AlertsModel extends ConnectedPalsModel {
     }
 
     if (responseData['status'] == true) {
-      Alert syncAlert = new Alert(idAlert: alert.idAlert, status: "complete");
+      Alert syncAlert = new Alert(
+          idAlert: alert.idAlert,
+          idDevice: alert.idDevice,
+          idUser: alert.idUser,
+          status: "completed",
+          type: alert.type,
+          registerDate: alert.registerDate);
       AlertsDb.db.updateAlert(syncAlert);
     } else {
       print("No se pudo sincronizar la alerta");

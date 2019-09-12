@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pal/database/alerts_db.dart';
 import 'package:scoped_model/scoped_model.dart';
-
+import 'package:toast/toast.dart';
 import 'package:location/location.dart' as geoloc;
 
 import '../scoped-models/main.dart';
@@ -31,31 +32,13 @@ class _AlertsState extends State<Alerts> {
 
   @override
   initState() {
-    // AlertsDb.db.deleteTable();
-
     super.initState();
   }
 
   void _sendAlert(int type, Function alert) async {
     alert(type).then((response) {
-      print("Respuesta de la alerta en UI $response");
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Alerta!'),
-            content: Text(response['message']),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('Okay'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        },
-      );
+      Toast.show(response['message'], context,
+          duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
     });
   }
 
@@ -63,6 +46,16 @@ class _AlertsState extends State<Alerts> {
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
         builder: (BuildContext context, Widget child, MainModel model) {
+      AlertsDb.db.getStatusAlert().then((alert) {
+        
+        if (alert == null) {
+          model.setActiveAlert(false);
+        } else {
+          print("Hay alerta activa en el dispositivo, esperando como perro internet!");
+          model.setActiveAlert(true);
+          model.syncAlert(alert);
+        }
+      });
       return Scaffold(
         // key: _scaffoldKey,
         drawer: NavBar(model),

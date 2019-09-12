@@ -1,13 +1,14 @@
 import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:toast/toast.dart';
 import 'dart:io' show Platform;
 
 import '../scoped-models/main.dart';
 
 /**
  * AuthPage
- * @version 0.5
+ * @version 1.1
  * @author Daniel Huidobro <daniel@rebootproject.mx>
  */
 class AuthPage extends StatefulWidget {
@@ -96,26 +97,10 @@ class _AuthPageState extends State<AuthPage> {
             _formData['idDevice'])
         .then((response) {
       print("Desde login R" + response.toString());
+      Toast.show(response['message'], context,
+          duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
       if (response['success']) {
         Navigator.pushReplacementNamed(context, '/');
-      } else {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Alerta!'),
-              content: Text(response['message']),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text('Okay'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            );
-          },
-        );
       }
     });
   }
