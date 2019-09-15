@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pal/database/alerts_db.dart';
+import 'package:pal/models/alert.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:toast/toast.dart';
 import 'package:location/location.dart' as geoloc;
@@ -42,18 +43,48 @@ class _AlertsState extends State<Alerts> {
     });
   }
 
+  void _cancelAlert(Function cancel, Function activeAlert) async {
+    AlertsDb.db.getStatusAlert().then((alert) {
+      if (alert == null) {
+        activeAlert(false);
+        Toast.show("No encontramos alerta activa", context,
+            duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+      } else if (alert.status == "sync") {
+        Alert syncAlert = Alert(
+            idAlert: alert.idAlert,
+            idDevice: alert.idDevice,
+            idUser: alert.idUser,
+            type: alert.type,
+            status: "complete",
+            registerDate: "");
+        AlertsDb.db.updateAlert(syncAlert);
+        Toast.show("Tu alerta se ha cancelado", context,
+            duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+        activeAlert(false);
+      } else if (alert.status == "process") {
+        cancel(alert).then((response) {
+          Toast.show(response['message'], context,
+              duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
         builder: (BuildContext context, Widget child, MainModel model) {
       AlertsDb.db.getStatusAlert().then((alert) {
-        
         if (alert == null) {
           model.setActiveAlert(false);
-        } else {
-          print("Hay alerta activa en el dispositivo, esperando como perro internet!");
+        } else if (alert.status == "process") {
+          //print("Hay alerta activa en el dispositivo, ya esta en el servidor!");
           model.setActiveAlert(true);
+        } else if (alert.status == "sync") {
+          // print(
+          //     "Hay alerta activa en el dispositivo, esperando como perro internet!");
           model.syncAlert(alert);
+          model.setActiveAlert(true);
         }
       });
       return Scaffold(
@@ -187,7 +218,8 @@ class _AlertsState extends State<Alerts> {
                             color: Colors.red,
                             icon: Icon(Icons.cancel),
                             onPressed: () {
-                              _sendAlert(1, model.sendAlert);
+                              _cancelAlert(
+                                  model.cancelAlert, model.setActiveAlert);
                             },
                           ),
                         )

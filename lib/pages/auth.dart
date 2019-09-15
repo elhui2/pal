@@ -81,9 +81,9 @@ class _AuthPageState extends State<AuthPage> {
     if (Platform.isAndroid) {
       //TODO: En android sacar el id del device o mejor guardar el token de firebase
       AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      print('Running on ${androidInfo.id}');
+      print('Running on ${androidInfo.androidId}');
       _formData['osdevice'] = "android";
-      _formData['idDevice'] = androidInfo.id;
+      _formData['idDevice'] = androidInfo.androidId;
     } else if (Platform.isIOS) {
       IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
       print('Running on ${iosInfo.identifierForVendor}');

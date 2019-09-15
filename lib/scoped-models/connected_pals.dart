@@ -51,7 +51,7 @@ class AlertsModel extends ConnectedPalsModel {
       }
 
       final List<Alert> fetchAlertList = [];
-
+      AlertsDb.db.deleteTable();
       alertListData['response'].forEach((dynamic alertData) {
         final Alert alert = Alert(
           idAlert: int.parse(alertData['id_alert']),
@@ -61,6 +61,7 @@ class AlertsModel extends ConnectedPalsModel {
           type: alertData['type'],
           registerDate: alertData['register_date'],
         );
+        AlertsDb.db.newAlert(alert);
         fetchAlertList.add(alert);
       });
 
@@ -79,43 +80,35 @@ class AlertsModel extends ConnectedPalsModel {
     notifyListeners();
   }
 
-  Future<Map<String, dynamic>> cancelAlert() async {
+  Future<Map<String, dynamic>> cancelAlert(Alert localAlert) async {
     _isLoading = true;
     notifyListeners();
     http.Response _response;
     Map<String, dynamic> responseData;
-    _activeAlert = false;
-    notifyListeners();
-    AlertsDb.db.getStatusAlert().then((alert) {
-      if (alert == null) {
-      } else {
-        print("ID cancel -> ${alert.idAlert}");
-        print("Status cancel -> ${alert.status}");
-        Alert syncAlert = Alert(
-            idAlert: alert.idAlert,
-            idDevice: alert.idDevice,
-            idUser: alert.idUser,
-            type: alert.type,
-            status: "complete",
-            registerDate: "");
-        AlertsDb.db.updateAlert(syncAlert);
-      }
-    });
-
     try {
-      _response = await http.post(config.apiUrl + '/alerts/cancel', body: {
+      _response = await http.post(config.apiUrl + '/alerts/cancel_app', body: {
         'device': _authenticatedUser.idDevice,
         'lat': _userCurrentLocation.latitude.toString(),
         'lng': _userCurrentLocation.longitude.toString()
       });
-
+      print(_response.body);
       responseData = json.decode(_response.body);
+      if (responseData["status"] == true) {
+        _activeAlert = false;
+        notifyListeners();
+        fetchAlerts();
+        return {
+          'success': true,
+          'message': 'Tu alerta se ha cancelado con éxito'
+        };
+      } else {
+        return {'success': false, 'message': responseData['message']};
+      }
     } catch (_ex) {
       print("Error en alerta ->" + _ex.toString());
       return {
         'success': false,
-        'message':
-            'No tienes internet, el alerta se actualizará en el dispositivo para tu siguiente conexión'
+        'message': 'No pudimos conectarnos con el servidor, intentalo más tarde'
       };
     }
   }
@@ -134,17 +127,6 @@ class AlertsModel extends ConnectedPalsModel {
     http.Response _response;
     Map<String, dynamic> responseData;
 
-    if (type == 3 || type == 4) {
-      _activeAlert = true;
-      AlertsDb.db.newAlert(new Alert(
-          //idAlert: 0,
-          idDevice: _authenticatedUser.idDevice,
-          idUser: _authenticatedUser.idUser,
-          status: "sync",
-          type: type.toString(),
-          registerDate: ""));
-    }
-
     try {
       _response = await http.post(config.apiUrl + '/alerts', body: {
         'device': _authenticatedUser.idDevice,
@@ -155,6 +137,13 @@ class AlertsModel extends ConnectedPalsModel {
 
       responseData = json.decode(_response.body);
     } catch (_ex) {
+      AlertsDb.db.newAlert(new Alert(
+          //idAlert: 0,
+          idDevice: _authenticatedUser.idDevice,
+          idUser: _authenticatedUser.idUser,
+          status: "sync",
+          type: type.toString(),
+          registerDate: ""));
       print("Error en alerta ->" + _ex.toString());
       return {
         'success': false,
@@ -166,6 +155,7 @@ class AlertsModel extends ConnectedPalsModel {
     if (responseData['status'] == true) {
       success = true;
       message = 'Se envió la alerta';
+      fetchAlerts();
     } else {
       success = false;
       message = responseData['message'];
@@ -176,6 +166,9 @@ class AlertsModel extends ConnectedPalsModel {
     return {'success': success, 'message': message};
   }
 
+  /**
+   * 
+   */
   Future syncAlert(Alert alert) async {
     http.Response _response;
     Map<String, dynamic> responseData;
@@ -196,14 +189,7 @@ class AlertsModel extends ConnectedPalsModel {
     }
 
     if (responseData['status'] == true) {
-      Alert syncAlert = new Alert(
-          idAlert: alert.idAlert,
-          idDevice: alert.idDevice,
-          idUser: alert.idUser,
-          status: "completed",
-          type: alert.type,
-          registerDate: alert.registerDate);
-      AlertsDb.db.updateAlert(syncAlert);
+      fetchAlerts();
     } else {
       print("No se pudo sincronizar la alerta");
     }

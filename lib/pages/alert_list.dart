@@ -9,7 +9,7 @@ import '../scoped-models/main.dart';
 /// AlertList
 /// @version 1.1
 /// @author Daniel Huidobro daniel@rebootproject.mx
-/// 
+///
 class AlertList extends StatefulWidget {
   final MainModel model;
   AlertList(this.model);
@@ -25,6 +25,17 @@ class _AlertListState extends State<AlertList> {
   initState() {
     widget.model.fetchAlerts();
     super.initState();
+  }
+
+  String formatStatus(String status) {
+    switch (status) {
+      case 'process':
+        return "En proceso";
+      case 'dismiss':
+        return "Descartada";
+      case 'alert':
+        return "En seguimiento";
+    }
   }
 
   @override
@@ -44,12 +55,11 @@ class _AlertListState extends State<AlertList> {
                   ListTile(
                     title: Text(
                       formatDate(model.allAlerts[index].registerDate),
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    subtitle:
-                        Text('${model.allAlerts[index].type.toString()} | ${model.allAlerts[index].status.toString()}'),
+                    subtitle: Text(
+                        '${model.allAlerts[index].type.toString()} | ${formatStatus(model.allAlerts[index].status.toString())}'),
                   ),
                   Divider()
                 ],

@@ -47,10 +47,15 @@ class AlertsDb {
     return res;
   }
 
+  ///
+  /// getStatusAlert
+  /// @version 1.1
+  /// Obtiene alertas activas y por sincronizar(Prioridad)
+  ///
   Future<Alert> getStatusAlert() async {
     final db = await database;
-    var res =
-        await db.rawQuery("SELECT * FROM alerts WHERE status='sync' LIMIT 1");
+    var res = await db.rawQuery(
+        "SELECT * FROM alerts WHERE status='sync' OR status='process' ORDER BY status DESC LIMIT 1");
     List<Alert> list =
         res.isNotEmpty ? res.map((c) => Alert.fromMap(c)).toList() : [];
     if (list.length > 0) {
@@ -62,6 +67,6 @@ class AlertsDb {
 
   deleteTable() async {
     final db = await database;
-    db.rawDelete("DELETE FROM alerts");
+    db.rawDelete("DELETE FROM alerts WHERE status!='sync'");
   }
 }
