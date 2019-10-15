@@ -7,7 +7,8 @@ import '../../scoped-models/main.dart';
 
 ///
 /// Gmap
-/// @version 0.9.7
+/// @version 1.2
+/// @author Daniel Huidobro daniel@rebootproject.mx
 /// Mapa de google nativo
 ///
 class Gmap extends StatefulWidget {
@@ -21,7 +22,6 @@ class Gmap extends StatefulWidget {
     return state;
   }
 }
-
 
 class _GmapState extends State<Gmap> {
   final location = geoloc.Location();
@@ -51,7 +51,6 @@ class _GmapState extends State<Gmap> {
 
   @override
   void setState(fn) {
-    print("Gmap setState");
     super.setState(fn);
   }
 
@@ -60,13 +59,15 @@ class _GmapState extends State<Gmap> {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
         return GoogleMap(
-            mapType: MapType.normal,
-            initialCameraPosition:
-                new CameraPosition(target: currentPosition, zoom: 14.0),
-            onMapCreated: (GoogleMapController controller) {
-              mapController = controller;
-            },
-            markers: _markers);
+          mapType: MapType.normal,
+          initialCameraPosition:
+              new CameraPosition(target: currentPosition, zoom: 14.0),
+          onMapCreated: (GoogleMapController controller) {
+            mapController = controller;
+          },
+          markers: _markers,
+          myLocationButtonEnabled: false,
+        );
       },
     );
   }

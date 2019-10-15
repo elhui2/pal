@@ -12,7 +12,7 @@ import '../widgets/location/gmap.dart';
 
 ///
 /// alerts
-/// @version 1.1
+/// @version 1.2
 /// @author Daniel Huidobro <daniel@rebootproject.mx>
 /// Boton de alerta del app
 ///
@@ -34,6 +34,15 @@ class _AlertsState extends State<Alerts> {
   @override
   initState() {
     super.initState();
+    location.hasPermission().then((permisions) {
+      if (permisions == false) {
+        location.requestPermission().then((request) {
+          if (request == true) {
+            print("Permisos de geolocalizacion $request");
+          }
+        });
+      }
+    });
   }
 
   void _sendAlert(int type, Function alert) async {
@@ -93,117 +102,142 @@ class _AlertsState extends State<Alerts> {
         appBar: AppBar(
           title: Text('Alertas'),
           actions: <Widget>[
-            IconButton(
-              icon: Icon((model.currentLocation == null)
-                  ? Icons.gps_not_fixed
-                  : Icons.gps_fixed),
-              onPressed: () {
-                location.hasPermission().then((permisions) {
-                  print("NavButton hasPermission $permisions");
-                  if (permisions == false) {
-                    location.requestPermission().then((request) {
-                      print("NavButton requestPermission $request");
-                      if (request == true) {
-                        location.getLocation().then((currentLoc) {
-                          print(
-                              "NavButton getLocation ${currentLoc.latitude},${currentLoc.longitude}");
-                          model.setCurrentLocation(
-                              currentLoc.latitude, currentLoc.longitude);
-                          Navigator.pushReplacementNamed(context, '/');
-                        }).catchError((error) {
-                          print("Error  ${error.toString()}");
-                        });
-                      }
-                    });
-                  }
-                });
-              },
-            )
+            // TODO: Esto para otra version con la funcion de tomar foto
+            // IconButton(
+            //   icon: Icon((model.currentLocation == null)
+            //       ? Icons.gps_not_fixed
+            //       : Icons.gps_fixed),
+            //   onPressed: () {
+            //     location.hasPermission().then((permisions) {
+            //       print("NavButton hasPermission $permisions");
+            //       if (permisions == false) {
+            //         location.requestPermission().then((request) {
+            //           print("NavButton requestPermission $request");
+            //           if (request == true) {
+            //             location.getLocation().then((currentLoc) {
+            //               print(
+            //                   "NavButton getLocation ${currentLoc.latitude},${currentLoc.longitude}");
+            //               model.setCurrentLocation(
+            //                   currentLoc.latitude, currentLoc.longitude);
+            //               Navigator.pushReplacementNamed(context, '/');
+            //             }).catchError((error) {
+            //               print("Error  ${error.toString()}");
+            //             });
+            //           }
+            //         });
+            //       }
+            //     });
+            //   },
+            // )
           ],
         ),
         body: Column(
           children: <Widget>[
-            Container(
-              width: MediaQuery.of(context).size.width * 0.8,
-              height: MediaQuery.of(context).size.height / 16,
-              child: Center(
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                      child: Icon(
-                        Icons.map,
-                        color: Colors.deepOrange,
+            Expanded(
+              flex: 1,
+              child: Container(
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        child: Icon(
+                          Icons.map,
+                          color: Colors.deepOrange,
+                        ),
                       ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(left: 8),
-                      child: Text(
-                        "Revisa tu ubicación en el mapa",
-                        style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold),
+                      Container(
+                        child: Text(
+                          "Revisa tu ubicación en el mapa",
+                          style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 3.7,
-              child: Gmap(model),
+            Expanded(
+              flex: 4,
+              child: Container(
+                child: Gmap(model),
+              ),
             ),
-            Container(
-              margin: EdgeInsets.only(top: 18),
-              width: MediaQuery.of(context).size.width / 1.2,
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.65,
-                    child: Center(
-                      child: Row(
-                        children: <Widget>[
-                          Container(
-                            child: Icon(
-                              Icons.notifications,
-                              color: Colors.deepOrange,
-                            ),
+            Expanded(
+              flex: 1,
+              child: (model.currentLocation != null &&
+                      model.currentLocation.latitude != 0)
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                          child: Icon(
+                            Icons.notifications,
+                            color: Colors.deepOrange,
                           ),
-                          Container(
-                            margin: EdgeInsets.only(left: 8),
-                            child: Text(
-                              "Selecciona tipo de alerta",
-                              style: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold),
-                            ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(left: 8),
+                          child: Text(
+                            "Selecciona tipo de alerta",
+                            style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
                           ),
-                        ],
+                        ),
+                      ],
+                    )
+                  : FlatButton(
+                      color: Colors.red,
+                      textColor: Colors.white,
+                      child: Text(
+                        "Solicitar permisos de ubicación",
                       ),
+                      onPressed: () {
+                        location.hasPermission().then((permisions) {
+                          print("NavButton hasPermission $permisions");
+                          if (permisions == false) {
+                            location.requestPermission().then((request) {
+                              print("NavButton requestPermission $request");
+                              if (request == true) {
+                                location.getLocation().then((currentLoc) {
+                                  print(
+                                      "NavButton getLocation ${currentLoc.latitude},${currentLoc.longitude}");
+                                  model.setCurrentLocation(currentLoc.latitude,
+                                      currentLoc.longitude);
+                                  Navigator.pushReplacementNamed(context, '/');
+                                }).catchError((error) {
+                                  print("Error  ${error.toString()}");
+                                });
+                              }
+                            });
+                          }
+                        });
+                      },
                     ),
-                  )
-                ],
+            ),
+            Expanded(
+              flex: 1,
+              child: Container(
+                width: MediaQuery.of(context).size.width * .90,
+                child: Text(
+                  "Revisa que tu ubicación en el mapa sea la correcta y selecciona un tipo de alerta",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.black54, fontSize: 14),
+                ),
               ),
             ),
-            Container(
-              margin: EdgeInsets.only(top: 18, bottom: 18),
-              width: MediaQuery.of(context).size.width / 1.2,
-              child: Text(
-                "De preferencia, revisa que tu ubicación en el mapa se a la correcta y presiona un tipo de alerta",
-                style: TextStyle(color: Colors.black54, fontSize: 14),
-              ),
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 3,
-              child: Center(
+            Expanded(
+              flex: 4,
+              child: Container(
                 child: (model.getActiveAlert)
                     ? Center(
                         child: Column(children: <Widget>[
                         Container(
-                          padding: EdgeInsets.all(10),
                           child: Text(
                             "Cancelar Alerta",
                             style: TextStyle(
@@ -283,8 +317,8 @@ class _AlertsState extends State<Alerts> {
                       ),
               ),
             ),
-            Container(
-              width: MediaQuery.of(context).size.width * .80,
+            Expanded(
+              flex: 1,
               child: Column(
                 children: <Widget>[
                   Container(
@@ -303,7 +337,7 @@ class _AlertsState extends State<Alerts> {
                   )
                 ],
               ),
-            )
+            ),
           ],
         ),
       );

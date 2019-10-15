@@ -13,7 +13,7 @@ import '../models/location_data.dart';
 
 ///
 /// ConnectedPalsModel
-/// @version 1.1
+/// @version 1.2
 /// @author Daniel Huidobro <daniel@rebootproject.mx>
 /// Modelo principal del app
 ///
@@ -52,11 +52,12 @@ class AlertsModel extends ConnectedPalsModel {
 
       final List<Alert> fetchAlertList = [];
       AlertsDb.db.deleteTable();
+      print(alertListData['response']);
       alertListData['response'].forEach((dynamic alertData) {
         final Alert alert = Alert(
-          idAlert: int.parse(alertData['id_alert']),
-          idDevice: alertData['id_device'],
-          idUser: int.parse(alertData['id_user']),
+          idAlert: alertData['id_alert'],
+          idDevice: alertData['id_device'].toString(),
+          idUser: alertData['id_user'],
           status: alertData['status'],
           type: alertData['type'],
           registerDate: alertData['register_date'],
@@ -86,13 +87,17 @@ class AlertsModel extends ConnectedPalsModel {
     http.Response _response;
     Map<String, dynamic> responseData;
     try {
-      _response = await http.post(config.apiUrl + '/alerts/cancel_app', body: {
+      _response = await http.post(config.apiUrl + '/alerts_app/cancel', body: {
         'device': _authenticatedUser.idDevice,
         'lat': _userCurrentLocation.latitude.toString(),
-        'lng': _userCurrentLocation.longitude.toString()
+        'lng': _userCurrentLocation.longitude.toString(),
+        'token': "1234"
       });
+
       print(_response.body);
+
       responseData = json.decode(_response.body);
+
       if (responseData["status"] == true) {
         _activeAlert = false;
         notifyListeners();
@@ -128,11 +133,13 @@ class AlertsModel extends ConnectedPalsModel {
     Map<String, dynamic> responseData;
 
     try {
-      _response = await http.post(config.apiUrl + '/alerts', body: {
+      _response = await http.post(config.apiUrl + '/alerts_app', body: {
         'device': _authenticatedUser.idDevice,
         'code_panic': type.toString(),
         'lat': _userCurrentLocation.latitude.toString(),
-        'lng': _userCurrentLocation.longitude.toString()
+        'lng': _userCurrentLocation.longitude.toString(),
+        'token': "token",
+        'type': (type == 3) ? "policia" : "medico",
       });
 
       responseData = json.decode(_response.body);
@@ -214,6 +221,7 @@ class RefersModel extends ConnectedPalsModel {
     return http
         .get(config.apiUrl + '/refers/get/${_authenticatedUser.idUser}')
         .then((http.Response response) {
+      print(response.body);
       final Map<String, dynamic> referListData = jsonDecode(response.body);
       if (referListData['status'] == false) {
         _isLoading = false;
@@ -223,10 +231,10 @@ class RefersModel extends ConnectedPalsModel {
       final List<Refer> fetchReferList = [];
       referListData['response'].forEach((dynamic referData) {
         final Refer refer = Refer(
-            idRefer: int.parse(referData['id_user_reference']),
+            idRefer: referData['id_user_reference'],
             name: referData['name'],
             email: referData['email'],
-            phone: referData['phone'],
+            phone: referData['phone'].toString(),
             relationship: referData['relationship'],
             registerDate: referData['register_date']);
         fetchReferList.add(refer);
@@ -391,21 +399,22 @@ class UserModel extends ConnectedPalsModel {
       hasError = false;
       message = 'Login Exitoso';
       _authenticatedUser = User(
-        idUser: int.parse(responseData['response']['id_user']),
+        idUser: responseData['response']['id_user'],
         firstName: responseData['response']['first_name'],
         lastName: responseData['response']['last_name'],
         email: responseData['response']['email'],
-        phone: responseData['response']['mobile_num'],
+        phone: responseData['response']['mobile_num'].toString(),
         token: responseData['response']['token'],
         idDevice: idDevice,
       );
 
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setInt('idUser', int.parse(responseData['response']['id_user']));
+      prefs.setInt('idUser', responseData['response']['id_user']);
       prefs.setString('firstName', responseData['response']['first_name']);
       prefs.setString('lastName', responseData['response']['last_name']);
       prefs.setString('email', responseData['response']['email']);
-      prefs.setString('mobileNum', responseData['response']['mobile_num']);
+      prefs.setString(
+          'mobileNum', responseData['response']['mobile_num'].toString());
       prefs.setString('token', responseData['response']['token']);
       prefs.setString('idDevice', idDevice);
     } else {
