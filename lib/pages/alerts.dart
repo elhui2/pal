@@ -39,7 +39,16 @@ class _AlertsState extends State<Alerts> {
         location.requestPermission().then((request) {
           if (request == true) {
             print("Permisos de geolocalizacion $request");
+            location.getLocation().then((currentLocation) {
+              widget.model.setCurrentLocation(
+                  currentLocation.latitude, currentLocation.longitude);
+            });
           }
+        });
+      } else {
+        location.getLocation().then((currentLocation) {
+          widget.model.setCurrentLocation(
+              currentLocation.latitude, currentLocation.longitude);
         });
       }
     });

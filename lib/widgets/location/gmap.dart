@@ -42,8 +42,9 @@ class _GmapState extends State<Gmap> {
               "Init onLocationChanged ${currentLocation.latitude},${currentLocation.longitude}");
           widget.model.setCurrentLocation(
               currentLocation.latitude, currentLocation.longitude);
-              currentPosition = new LatLng(currentLocation.latitude, currentLocation.longitude);
-              centerMarker(currentPosition);
+          currentPosition =
+              new LatLng(currentLocation.latitude, currentLocation.longitude);
+          centerMarker(currentPosition);
         });
       }
     });
@@ -52,7 +53,13 @@ class _GmapState extends State<Gmap> {
   @override
   void setState(fn) {
     super.setState(fn);
+    print("Gmap setState");
   }
+
+  // @override
+  // void deactivate() {
+  //   super.deactivate();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +73,8 @@ class _GmapState extends State<Gmap> {
             mapController = controller;
           },
           markers: _markers,
-          myLocationButtonEnabled: false,
+          myLocationButtonEnabled: true,
+          myLocationEnabled: true,
         );
       },
     );

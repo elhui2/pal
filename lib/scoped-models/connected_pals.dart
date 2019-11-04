@@ -256,6 +256,7 @@ class RefersModel extends ConnectedPalsModel {
       'relationship': relationship,
       'userId': _authenticatedUser.idUser.toString()
     }).then((http.Response response) {
+      print(response.body);
       final Map<String, dynamic> responseData = json.decode(response.body);
       if (responseData['status']) {
         final Refer newRefer = Refer(
