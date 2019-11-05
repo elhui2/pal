@@ -35,8 +35,21 @@ class _GmapState extends State<Gmap> {
     super.initState();
     print("Gmap initState");
     location.hasPermission().then((permisions) {
-      print("Init hasPermission $permisions");
-      if (permisions == true) {
+      if (permisions == false) {
+        location.requestPermission().then((request) {
+          if (request == true) {
+            location.onLocationChanged().listen((currentLocation) {
+              print(
+                  "Init onLocationChanged ${currentLocation.latitude},${currentLocation.longitude}");
+              widget.model.setCurrentLocation(
+                  currentLocation.latitude, currentLocation.longitude);
+              currentPosition = new LatLng(
+                  currentLocation.latitude, currentLocation.longitude);
+              centerMarker(currentPosition);
+            });
+          }
+        });
+      } else {
         location.onLocationChanged().listen((currentLocation) {
           print(
               "Init onLocationChanged ${currentLocation.latitude},${currentLocation.longitude}");

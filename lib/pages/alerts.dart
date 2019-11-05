@@ -12,7 +12,7 @@ import '../widgets/location/gmap.dart';
 
 ///
 /// alerts
-/// @version 1.2
+/// @version 1.2.5
 /// @author Daniel Huidobro <daniel@rebootproject.mx>
 /// Boton de alerta del app
 ///
@@ -34,24 +34,6 @@ class _AlertsState extends State<Alerts> {
   @override
   initState() {
     super.initState();
-    location.hasPermission().then((permisions) {
-      if (permisions == false) {
-        location.requestPermission().then((request) {
-          if (request == true) {
-            print("Permisos de geolocalizacion $request");
-            location.getLocation().then((currentLocation) {
-              widget.model.setCurrentLocation(
-                  currentLocation.latitude, currentLocation.longitude);
-            });
-          }
-        });
-      } else {
-        location.getLocation().then((currentLocation) {
-          widget.model.setCurrentLocation(
-              currentLocation.latitude, currentLocation.longitude);
-        });
-      }
-    });
   }
 
   void _sendAlert(int type, Function alert) async {
