@@ -14,7 +14,7 @@ Todos los usuarios pueden tener hasta tres referidos con estas relaciones:
 - otro
 
 ### TODO
-
+- Desactivar mapa al salir
 - Seguridad por token al consumir el API
 - Comprobar Token
 - Listado de alertas offline
@@ -24,7 +24,9 @@ Todos los usuarios pueden tener hasta tres referidos con estas relaciones:
 - Imagen del botón cancelar con sombra @noellopez1
 - Capitalizar el campo de texto nombre en formulario de referidos
 - Telcado numeral en celular referido
-
+- Teclado email en referidos
+- Listado de referidos offline
+- Arreglar el cagadero del connected_pals.dart
 
 ### Cambios en esta version
 

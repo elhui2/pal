@@ -13,7 +13,7 @@ import '../models/location_data.dart';
 
 ///
 /// ConnectedPalsModel
-/// @version 1.2
+/// @version 1.3
 /// @author Daniel Huidobro <daniel@rebootproject.mx>
 /// Modelo principal del app
 ///
@@ -245,6 +245,11 @@ class RefersModel extends ConnectedPalsModel {
     });
   }
 
+  ///
+  /// addRefer
+  /// @version 1.3
+  /// Agrega un referido al servidor
+  ///
   Future<Null> addRefer(
       String name, String email, String phone, String relationship) {
     _isLoading = true;
@@ -260,10 +265,10 @@ class RefersModel extends ConnectedPalsModel {
       final Map<String, dynamic> responseData = json.decode(response.body);
       if (responseData['status']) {
         final Refer newRefer = Refer(
-            idRefer: int.parse(responseData['response']['id_user_reference']),
+            idRefer: responseData['response']['id_user_reference'],
             name: responseData['response']['name'],
             email: responseData['response']['email'],
-            phone: responseData['response']['phone'],
+            phone: responseData['response']['phone'].toString(),
             relationship: responseData['response']['relationship'],
             registerDate: responseData['response']['register_date']);
         _refers.add(newRefer);
@@ -275,6 +280,11 @@ class RefersModel extends ConnectedPalsModel {
     });
   }
 
+  ///
+  /// addRefer
+  /// @version 1.3
+  /// Agrega un referido al servidor
+  ///
   Future<Null> updateRefer(
       String name, String email, String phone, String relationship) {
     return http.post(config.apiUrl + '/refers/update', body: {
@@ -287,10 +297,10 @@ class RefersModel extends ConnectedPalsModel {
       final Map<String, dynamic> responseData = json.decode(response.body);
       if (responseData['status']) {
         final Refer updatedRefer = Refer(
-            idRefer: int.parse(responseData['response']['id_user_reference']),
+            idRefer: responseData['response']['id_user_reference'],
             name: responseData['response']['name'],
             email: responseData['response']['email'],
-            phone: responseData['response']['phone'],
+            phone: responseData['response']['phone'].toString(),
             relationship: responseData['response']['relationship'],
             registerDate: responseData['response']['register_date']);
         _refers[selectedReferIndex] = updatedRefer;
