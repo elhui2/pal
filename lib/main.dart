@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pal/database/alerts_db.dart';
+import 'package:pal/pages/forgot.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import './config.dart';
@@ -57,6 +58,7 @@ class _MyAppState extends State<MyApp> {
               }),
           '/alerts': (BuildContext context) => AlertsAdmin(_model),
           '/refers': (BuildContext context) => RefersAdmin(_model),
+          '/forgot': (BuildContext context) => ForgotPage(_model),
         },
         onGenerateRoute: (RouteSettings settings) {
           final List<String> pathElements = settings.name.split('/');

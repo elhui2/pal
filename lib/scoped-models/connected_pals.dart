@@ -308,6 +308,7 @@ class RefersModel extends ConnectedPalsModel {
         //TODO: Cachar errores
       }
       _isLoading = false;
+      _selReferIndex = null;
       notifyListeners();
     });
   }

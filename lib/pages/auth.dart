@@ -144,6 +144,15 @@ class _AuthPageState extends State<AuthPage> {
                         );
                       },
                     ),
+                    Container(
+                      child: RaisedButton(
+                        textColor: Colors.white,
+                        child: Text('Olvidaste tu contraseña?'),
+                        onPressed: () {
+                          Navigator.pushReplacementNamed(context, '/forgot');
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
