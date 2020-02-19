@@ -364,6 +364,9 @@ class UserModel extends ConnectedPalsModel {
       _userCurrentLocation = new LocationData(
           latitude: lat, longitude: lng, description: null, address: null);
     }
+    if (_activeAlert) {
+      track();
+    }
     notifyListeners();
   }
 
@@ -546,6 +549,36 @@ class UserModel extends ConnectedPalsModel {
     } else {
       _authenticatedUser = null;
     }
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  /// track
+  /// @version 0.1.1
+  /// Verificara el token del usuario y lo renueva si es necesario
+  /// TODO: Verificar token de acceso en api y app
+  ///
+  void track() async {
+    http.Response _response;
+    try {
+      _response = await http.post(config.apiUrl + '/alerts_app/track', body: {
+        "device": _authenticatedUser.idDevice,
+        "token": _authenticatedUser.token,
+        'lat': (_userCurrentLocation == null)
+            ? 0.0.toString()
+            : _userCurrentLocation.latitude.toString(),
+        'lng': (_userCurrentLocation == null)
+            ? 0.0.toString()
+            : _userCurrentLocation.longitude.toString(),
+      });
+    } catch (err) {
+      print("checkToken -> No hay conexión con el servidor");
+    }
+
+    final Map<String, dynamic> responseData = json.decode(_response.body);
+
+    print(responseData["message"]);
+
     _isLoading = false;
     notifyListeners();
   }

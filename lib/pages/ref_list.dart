@@ -18,6 +18,7 @@ class _RefListState extends State<RefList> {
   @override
   initState() {
     widget.model.fetchRefers();
+    widget.model.selectRefer(null);
     super.initState();
   }
 

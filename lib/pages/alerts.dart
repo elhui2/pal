@@ -78,7 +78,7 @@ class _AlertsState extends State<Alerts> {
         if (alert == null) {
           model.setActiveAlert(false);
         } else if (alert.status == "process") {
-          //print("Hay alerta activa en el dispositivo, ya esta en el servidor!");
+          // print("Hay alerta activa en el dispositivo, ya esta en el servidor!");
           model.setActiveAlert(true);
         } else if (alert.status == "sync") {
           // print(
@@ -238,10 +238,10 @@ class _AlertsState extends State<Alerts> {
                           ),
                         ),
                         Container(
-                          child: IconButton(
-                            iconSize: MediaQuery.of(context).size.width / 3,
-                            color: Colors.red,
-                            icon: Icon(Icons.cancel),
+                          width: MediaQuery.of(context).size.width / 3,
+                          child: FlatButton(
+                            padding: EdgeInsets.all(0.0),
+                            child: Image.asset('assets/bt_cancel.png'),
                             onPressed: () {
                               _cancelAlert(
                                   model.cancelAlert, model.setActiveAlert);
