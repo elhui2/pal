@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pal/database/alerts_db.dart';
-import 'package:pal/pages/forgot.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import './config.dart';
@@ -9,11 +7,10 @@ import './pages/alerts_admin.dart';
 import './pages/refers_admin.dart';
 import './pages/alerts.dart';
 import './scoped-models/main.dart';
-import 'models/alert.dart';
 
 ///
 /// main.dart
-/// @version 0.9.7
+/// @version 1.6
 /// @author Daniel Huidobro daniel@rebootproject.mx
 ///
 void main() {
@@ -46,6 +43,7 @@ class _MyAppState extends State<MyApp> {
     return ScopedModel<MainModel>(
       model: _model,
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
             brightness: Brightness.light,
             primarySwatch: Colors.deepOrange,
@@ -58,7 +56,6 @@ class _MyAppState extends State<MyApp> {
               }),
           '/alerts': (BuildContext context) => AlertsAdmin(_model),
           '/refers': (BuildContext context) => RefersAdmin(_model),
-          '/forgot': (BuildContext context) => ForgotPage(_model),
         },
         onGenerateRoute: (RouteSettings settings) {
           final List<String> pathElements = settings.name.split('/');

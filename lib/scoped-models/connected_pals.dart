@@ -441,6 +441,78 @@ class UserModel extends ConnectedPalsModel {
     return {'success': !hasError, 'message': message};
   }
 
+  ///
+  ///register
+  ///@version 1.6.5
+  ///Login del app
+  ///
+  Future<Map<String, dynamic>> register(String name, String email, String phone,
+      String password, String osDevice, String idDevice) async {
+    http.Response _response;
+    Map<String, dynamic> responseData = new Map<String, dynamic>();
+    try {
+      _response = await http.post(config.apiUrl + '/users/register', body: {
+        "name": name,
+        "email": email,
+        "phone": phone,
+        "password": password,
+        'osdevice': osDevice,
+        'id_device': idDevice
+      });
+
+      responseData = json.decode(_response.body);
+
+    } catch (err) {
+      print("Error en login" + err.toString());
+      return {
+        'success': false,
+        'message': "No tienes conexión con el servidor"
+      };
+    }
+    if(responseData.isEmpty){
+      return {
+        'success': false,
+        'message': "No hay información disponible"
+      };
+    }
+    print(_response.body);
+    
+
+    bool success = false;
+    String message = 'Ocurrio un error';
+
+    if (responseData['status']) {
+      success = true;
+      // message = 'Login Exitoso';
+      // _authenticatedUser = User(
+      //   idUser: responseData['response']['id_user'],
+      //   firstName: responseData['response']['first_name'],
+      //   lastName: responseData['response']['last_name'],
+      //   email: responseData['response']['email'],
+      //   phone: responseData['response']['mobile_num'].toString(),
+      //   token: responseData['response']['token'],
+      //   idDevice: idDevice,
+      // );
+
+      // final SharedPreferences prefs = await SharedPreferences.getInstance();
+      // prefs.setInt('idUser', responseData['response']['id_user']);
+      // prefs.setString('firstName', responseData['response']['first_name']);
+      // prefs.setString('lastName', responseData['response']['last_name']);
+      // prefs.setString('email', responseData['response']['email']);
+      // prefs.setString(
+      //     'mobileNum', responseData['response']['mobile_num'].toString());
+      // prefs.setString('token', responseData['response']['token']);
+      // prefs.setString('idDevice', idDevice);
+    } else {
+      success = false;
+      message = responseData['message'];
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return {'success': success, 'message': message};
+  }
+
   Future<Map<String, dynamic>> updateUser(String password) async {
     _isLoading = false;
     final http.Response response = await http.post(

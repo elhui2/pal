@@ -7,14 +7,11 @@ import '../scoped-models/users.dart';
 
 ///
 /// forgot.dart
-/// @version 1.4
+/// @version 1.6
 /// @author Daniel Huidobro <daniel@rebootproject.mx>
+/// TODO: Agregar una imagen
 ///
 class ForgotPage extends StatefulWidget {
-  final MainModel model;
-
-  ForgotPage(this.model);
-
   @override
   State<StatefulWidget> createState() {
     return _ForgotPageState();
@@ -31,9 +28,10 @@ class _ForgotPageState extends State<ForgotPage> {
   Widget _buildEmailTextField() {
     return TextFormField(
       decoration: InputDecoration(
-          labelText: 'Ingresa tu dirección de correo',
-          filled: true,
-          fillColor: Colors.white),
+        labelText: 'Ingresa tu dirección de correo',
+        filled: true,
+        fillColor: Colors.black12,
+      ),
       keyboardType: TextInputType.emailAddress,
       validator: (String value) {
         if (value.isEmpty ||
@@ -78,7 +76,7 @@ class _ForgotPageState extends State<ForgotPage> {
           title: Text('Recuperar Contraseña'),
         ),
         body: Container(
-          color: Colors.black87,
+          color: Colors.white,
           padding: EdgeInsets.all(10.0),
           child: Center(
             child: SingleChildScrollView(

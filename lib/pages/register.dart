@@ -5,24 +5,25 @@ import 'package:toast/toast.dart';
 import 'dart:io' show Platform;
 
 import '../scoped-models/main.dart';
-import 'forgot.dart';
-import 'register.dart';
 
 ///
-/// AuthPage
+/// Register
 /// @version 1.6
 /// @author Daniel Huidobro <daniel@rebootproject.mx>
 ///
-class AuthPage extends StatefulWidget {
+class Register extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return _AuthPageState();
+    return _RegisterState();
   }
 }
 
-class _AuthPageState extends State<AuthPage> {
+class _RegisterState extends State<Register> {
+  
   final Map<String, dynamic> _formData = {
+    'name': null,
     'email': null,
+    'phone': null,
     'password': null,
     'acceptTerms': false,
     'osdevice': null,
@@ -31,19 +32,28 @@ class _AuthPageState extends State<AuthPage> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  DecorationImage _buildBackgroundImage() {
-    return DecorationImage(
-      fit: BoxFit.cover,
-      colorFilter:
-          ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.dstATop),
-      image: AssetImage('assets/background.jpg'),
+  Widget _buildNameTextField() {
+    return TextFormField(
+      decoration: InputDecoration(
+          labelText: 'Nombre Completo',
+          filled: true,
+          fillColor: Colors.black12),
+      keyboardType: TextInputType.text,
+      validator: (String value) {
+        if (value.isEmpty || value.length < 4) {
+          return 'Nombre Invalido';
+        }
+      },
+      onSaved: (String value) {
+        _formData['name'] = value;
+      },
     );
   }
 
   Widget _buildEmailTextField() {
     return TextFormField(
       decoration: InputDecoration(
-          labelText: 'E-Mail', filled: true, fillColor: Colors.white),
+          labelText: 'E-Mail', filled: true, fillColor: Colors.black12),
       keyboardType: TextInputType.emailAddress,
       validator: (String value) {
         if (value.isEmpty ||
@@ -58,10 +68,28 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
+  Widget _buildPhoneTextField() {
+    return TextFormField(
+      decoration: InputDecoration(
+          labelText: 'Telefono Celular',
+          filled: true,
+          fillColor: Colors.black12),
+      keyboardType: TextInputType.phone,
+      validator: (String value) {
+        if (!value.isEmpty && value.length != 10) {
+          return 'Telefono invalido';
+        }
+      },
+      onSaved: (String value) {
+        _formData['phone'] = value;
+      },
+    );
+  }
+
   Widget _buildPasswordTextField() {
     return TextFormField(
       decoration: InputDecoration(
-          labelText: 'Password', filled: true, fillColor: Colors.white),
+          labelText: 'Password', filled: true, fillColor: Colors.black12),
       obscureText: true,
       validator: (String value) {
         if (value.isEmpty || value.length < 4) {
@@ -74,7 +102,7 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
-  void _submitForm(Function login) async {
+  void _submitForm(Function register) async {
     if (!_formKey.currentState.validate()) {
       return;
     }
@@ -96,8 +124,8 @@ class _AuthPageState extends State<AuthPage> {
 
     _formKey.currentState.save();
 
-    login(_formData['email'], _formData['password'], _formData['osdevice'],
-            _formData['idDevice'])
+    register(_formData['name'], _formData['email'], _formData['phone'],
+            _formData['password'], _formData['osdevice'], _formData['idDevice'])
         .then((response) {
       print("Desde login R" + response.toString());
       Toast.show(response['message'], context,
@@ -114,12 +142,9 @@ class _AuthPageState extends State<AuthPage> {
     final double targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95;
     return Scaffold(
       appBar: AppBar(
-        title: Text('PAL'),
+        title: Text('Registro PAL'),
       ),
       body: Container(
-        decoration: BoxDecoration(
-          image: _buildBackgroundImage(),
-        ),
         padding: EdgeInsets.all(10.0),
         child: Center(
           child: SingleChildScrollView(
@@ -129,7 +154,15 @@ class _AuthPageState extends State<AuthPage> {
                 key: _formKey,
                 child: Column(
                   children: <Widget>[
+                    _buildNameTextField(),
+                    SizedBox(
+                      height: 10.0,
+                    ),
                     _buildEmailTextField(),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    _buildPhoneTextField(),
                     SizedBox(
                       height: 10.0,
                     ),
@@ -143,55 +176,12 @@ class _AuthPageState extends State<AuthPage> {
                         return RaisedButton(
                           textColor: Colors.white,
                           child: Text('Entrar'),
-                          onPressed: () => _submitForm(model.login),
+                          onPressed: () => _submitForm(model.register),
                         );
                       },
                     ),
                     SizedBox(
                       height: 16.0,
-                    ),
-                    Container(
-                      child: new GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => new ForgotPage()));
-                        },
-                        child: new Text(
-                          "¿Olvidaste tu contraseña?",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                            decoration: TextDecoration.underline,
-                            decorationColor: Colors.red,
-                            decorationStyle: TextDecorationStyle.wavy,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 16.0,
-                    ),
-                    Container(
-                      child: new GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => new Register()));
-                        },
-                        child: new Text(
-                          "Quiero registrarme",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                            decoration: TextDecoration.underline,
-                            decorationColor: Colors.red,
-                            decorationStyle: TextDecorationStyle.wavy,
-                          ),
-                        ),
-                      ),
                     ),
                   ],
                 ),
