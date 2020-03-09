@@ -1,4 +1,4 @@
-# PAL Version 1.6
+# PAL Version 1.6.1
 
 Alarma PAL para iOS y Android
 
@@ -28,7 +28,4 @@ Todos los usuarios pueden tener hasta tres referidos con estas relaciones:
 
 ### Cambios en esta version
 
-- Recuperar contraseña en App
-- Quitar recarga de pagina al solicitar los permisos del gps por primera vez
-- Imagen del botón cancelar con sombra @noellopez1
-- Arreglar track
+- Correccion de errores

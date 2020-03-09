@@ -12,7 +12,7 @@ import '../widgets/location/gmap.dart';
 
 ///
 /// alerts
-/// @version 1.2.5
+/// @version 1.6.1
 /// @author Daniel Huidobro <daniel@rebootproject.mx>
 /// Boton de alerta del app
 ///
@@ -33,6 +33,7 @@ class _AlertsState extends State<Alerts> {
 
   @override
   initState() {
+    widget.model.checkToken();
     super.initState();
   }
 

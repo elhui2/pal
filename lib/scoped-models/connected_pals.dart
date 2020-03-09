@@ -13,7 +13,7 @@ import '../models/location_data.dart';
 
 ///
 /// ConnectedPalsModel
-/// @version 1.3
+/// @version 1.6.1
 /// @author Daniel Huidobro <daniel@rebootproject.mx>
 /// Modelo principal del app
 ///
@@ -456,12 +456,11 @@ class UserModel extends ConnectedPalsModel {
         "email": email,
         "phone": phone,
         "password": password,
-        'osdevice': osDevice,
+        'os_device': osDevice,
         'id_device': idDevice
       });
 
       responseData = json.decode(_response.body);
-
     } catch (err) {
       print("Error en login" + err.toString());
       return {
@@ -469,40 +468,17 @@ class UserModel extends ConnectedPalsModel {
         'message': "No tienes conexión con el servidor"
       };
     }
-    if(responseData.isEmpty){
-      return {
-        'success': false,
-        'message': "No hay información disponible"
-      };
+    if (responseData.isEmpty) {
+      return {'success': false, 'message': "No hay información disponible"};
     }
     print(_response.body);
-    
 
     bool success = false;
     String message = 'Ocurrio un error';
 
     if (responseData['status']) {
       success = true;
-      // message = 'Login Exitoso';
-      // _authenticatedUser = User(
-      //   idUser: responseData['response']['id_user'],
-      //   firstName: responseData['response']['first_name'],
-      //   lastName: responseData['response']['last_name'],
-      //   email: responseData['response']['email'],
-      //   phone: responseData['response']['mobile_num'].toString(),
-      //   token: responseData['response']['token'],
-      //   idDevice: idDevice,
-      // );
-
-      // final SharedPreferences prefs = await SharedPreferences.getInstance();
-      // prefs.setInt('idUser', responseData['response']['id_user']);
-      // prefs.setString('firstName', responseData['response']['first_name']);
-      // prefs.setString('lastName', responseData['response']['last_name']);
-      // prefs.setString('email', responseData['response']['email']);
-      // prefs.setString(
-      //     'mobileNum', responseData['response']['mobile_num'].toString());
-      // prefs.setString('token', responseData['response']['token']);
-      // prefs.setString('idDevice', idDevice);
+      message = "Registro exitoso, te mandamos un email con tu información";
     } else {
       success = false;
       message = responseData['message'];
@@ -609,7 +585,7 @@ class UserModel extends ConnectedPalsModel {
             : _userCurrentLocation.longitude.toString(),
       });
     } catch (err) {
-      print("checkToken -> No hay conexión con el servidor");
+      print("checkToken -> No hay conexión con el servidor ${err}");
       return;
     }
 

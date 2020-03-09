@@ -7,7 +7,7 @@ import '../../scoped-models/main.dart';
 
 ///
 /// Gmap
-/// @version 1.2
+/// @version 1.6.1
 /// @author Daniel Huidobro daniel@rebootproject.mx
 /// Mapa de google nativo
 ///
@@ -39,8 +39,8 @@ class _GmapState extends State<Gmap> {
         location.requestPermission().then((request) {
           if (request == true) {
             location.onLocationChanged().listen((currentLocation) {
-              print(
-                  "Init onLocationChanged ${currentLocation.latitude},${currentLocation.longitude}");
+              // print(
+              //     "Init onLocationChanged ${currentLocation.latitude},${currentLocation.longitude}");
               widget.model.setCurrentLocation(
                   currentLocation.latitude, currentLocation.longitude);
               currentPosition = new LatLng(
