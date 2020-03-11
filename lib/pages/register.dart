@@ -19,7 +19,6 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  
   final Map<String, dynamic> _formData = {
     'name': null,
     'email': null,
@@ -154,6 +153,13 @@ class _RegisterState extends State<Register> {
                 key: _formKey,
                 child: Column(
                   children: <Widget>[
+                    Image.asset(
+                      'assets/logo_pal_orange.png',
+                      width: 96,
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
                     _buildNameTextField(),
                     SizedBox(
                       height: 10.0,

@@ -1,4 +1,4 @@
-# PAL Version 1.6.1
+# PAL Version 1.6.2
 
 Alarma PAL para iOS y Android
 
@@ -27,5 +27,4 @@ Todos los usuarios pueden tener hasta tres referidos con estas relaciones:
 - Arreglar el cagadero del connected_pals.dart
 
 ### Cambios en esta version
-
-- Correccion de errores
+- Mejoras de Look & Feel

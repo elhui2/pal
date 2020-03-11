@@ -11,7 +11,7 @@ description: Aplicacion pal para iOS y Android
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.6.1
+version: 1.6.2
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
@@ -33,7 +33,7 @@ dev_dependencies:
 # following page: https://www.dartlang.org/tools/pub/pubspec
   scoped_model: "^0.3.0"
   http: ^0.12.0+1
-  flutter_launcher_icons: "^0.7.0"
+  flutter_launcher_icons: "^0.7.4"
   shared_preferences: 0.5.1+1
   location: "^2.0.0"
   device_info: ^0.4.0+1
@@ -44,6 +44,7 @@ dev_dependencies:
   toast: ^0.1.5
 
 flutter_icons:
+  image_path_android : "assets/appicon_android.png"
   image_path: "assets/appicon.png"
   android: "launcher_icon"
   ios: true
@@ -62,6 +63,7 @@ flutter:
   - assets/bt_police.png
   - assets/bt_medic.png
   - assets/bt_cancel.png
+  - assets/logo_pal_orange.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.io/assets-and-images/#resolution-aware.

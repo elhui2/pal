@@ -86,6 +86,13 @@ class _ForgotPageState extends State<ForgotPage> {
                   key: _formKey,
                   child: Column(
                     children: <Widget>[
+                      Image.asset(
+                        'assets/logo_pal_orange.png',
+                        width: 96,
+                      ),
+                      SizedBox(
+                        height: 10.0,
+                      ),
                       _buildEmailTextField(),
                       SizedBox(
                         height: 10.0,
