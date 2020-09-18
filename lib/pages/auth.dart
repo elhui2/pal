@@ -1,8 +1,6 @@
-import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:toast/toast.dart';
-import 'dart:io' show Platform;
 
 import '../scoped-models/main.dart';
 import 'forgot.dart';
@@ -10,7 +8,7 @@ import 'register.dart';
 
 ///
 /// AuthPage
-/// @version 1.6
+/// @version 1.8
 /// @author Daniel Huidobro <daniel@rebootproject.mx>
 ///
 class AuthPage extends StatefulWidget {
@@ -78,22 +76,6 @@ class _AuthPageState extends State<AuthPage> {
     if (!_formKey.currentState.validate()) {
       return;
     }
-
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-
-    if (Platform.isAndroid) {
-      //TODO: En android sacar el id del device o mejor guardar el token de firebase
-      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      print('Running on ${androidInfo.androidId}');
-      _formData['osdevice'] = "android";
-      _formData['idDevice'] = androidInfo.androidId;
-    } else if (Platform.isIOS) {
-      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-      print('Running on ${iosInfo.identifierForVendor}');
-      _formData['osdevice'] = "ios";
-      _formData['idDevice'] = iosInfo.identifierForVendor;
-    }
-
     _formKey.currentState.save();
 
     login(_formData['email'], _formData['password'], _formData['osdevice'],

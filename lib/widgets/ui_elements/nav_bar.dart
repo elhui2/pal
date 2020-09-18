@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../scoped-models/main.dart';
 
+///
+/// nav_bar.dart
+/// @version 1.8
+/// @author Daniel Huidobro daniel@rebootproject.mx
+/// Sidebar del app
+///
 class NavBar extends StatelessWidget {
-
   MainModel model;
 
   NavBar(this.model);
@@ -39,9 +44,11 @@ class NavBar extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.exit_to_app),
-            title: Text('Salir'),
+            title: (model.user != null) ? Text('Salir') : Text('Entrar'),
             onTap: () {
-              _logout(context);
+              (model.user == null)
+                  ? Navigator.pushReplacementNamed(context, '/login')
+                  : _logout(context);
             },
           )
         ],
@@ -49,6 +56,10 @@ class NavBar extends StatelessWidget {
     );
   }
 
+  ///
+  /// _logout
+  /// Salida del sistema
+  ///
   void _logout(context) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('firstName');

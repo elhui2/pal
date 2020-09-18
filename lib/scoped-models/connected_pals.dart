@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config.dart';
+import '../models/deviceInfo.dart';
 import '../models/refer.dart';
 import '../models/alert.dart';
 import '../models/user.dart';
@@ -13,7 +14,7 @@ import '../models/location_data.dart';
 
 ///
 /// ConnectedPalsModel
-/// @version 1.6.1
+/// @version 1.8
 /// @author Daniel Huidobro <daniel@rebootproject.mx>
 /// Modelo principal del app
 ///
@@ -26,6 +27,53 @@ class ConnectedPalsModel extends Model {
   LocationData _userCurrentLocation;
   bool _isLoading = false;
   bool _activeAlert = false;
+  DeviceInfo _deviceInfo;
+
+  Future<void> setDeviceinfo(DeviceInfo device) async {
+    http.Response _response;
+    Map<String, dynamic> responseData;
+    try {
+      _response = await http.post(config.apiUrl + '/devices/check', body: {
+        'vendor_key': device.vendorKey,
+        'type': device.type,
+        'model': device.model,
+        'version_os': device.versionOs
+      });
+
+      // print(_response.toString());
+
+      responseData = json.decode(_response.body);
+
+      print(_response.body);
+
+      if (responseData["status"] == true) {
+        print("uuid de respuesta ----->" +
+            responseData['response']['vendor_key']);
+        _deviceInfo = new DeviceInfo(
+            idDevicePal: responseData['response']['id_device'],
+            regDatePal: responseData['response']['register_date'],
+            vendorKey: responseData['response']['vendor_key'],
+            type: responseData['response']['type'],
+            versionOs: responseData['response']['version_os'].toString(),
+            model: responseData['response']['model'],
+            vendorToken: null);
+        notifyListeners();
+        return {'success': true, 'message': 'El dispositivo se ha actualizado'};
+      } else {
+        return {'success': false, 'message': responseData['message']};
+      }
+    } catch (_ex) {
+      print("Error en setDeviceinfo ->" + _ex.toString());
+      return {
+        'success': false,
+        'message': 'No pudimos conectarnos con el servidor, intentalo más tarde'
+      };
+    }
+  }
+
+  DeviceInfo getDeviceInfo() {
+    return _deviceInfo;
+  }
 }
 
 class AlertsModel extends ConnectedPalsModel {
@@ -81,20 +129,26 @@ class AlertsModel extends ConnectedPalsModel {
     notifyListeners();
   }
 
+  ///
+  /// cancelAlert
+  /// @version 1.8
+  /// Cancelar una alerta
+  ///
   Future<Map<String, dynamic>> cancelAlert(Alert localAlert) async {
     _isLoading = true;
+    print("Cancelar la alerta!");
     notifyListeners();
     http.Response _response;
     Map<String, dynamic> responseData;
+
     try {
       _response = await http.post(config.apiUrl + '/alerts_app/cancel', body: {
-        'device': _authenticatedUser.idDevice,
+        'device': _deviceInfo.vendorKey,
         'lat': _userCurrentLocation.latitude.toString(),
         'lng': _userCurrentLocation.longitude.toString(),
         'token': "1234"
       });
-
-      print(_response.body);
+      print("Cancelar la alerta -> " + _response.body);
 
       responseData = json.decode(_response.body);
 
@@ -120,7 +174,7 @@ class AlertsModel extends ConnectedPalsModel {
 
   ///
   /// SendAlert
-  /// @version 1.1
+  /// @version 1.8
   /// Envia una alerta al servidor
   ///
   Future<Map<String, dynamic>> sendAlert(int type) async {
@@ -131,38 +185,63 @@ class AlertsModel extends ConnectedPalsModel {
 
     http.Response _response;
     Map<String, dynamic> responseData;
+    print("Vendor Key " + _deviceInfo.vendorKey);
+    var _dataRequest = {};
+    if (_authenticatedUser == null) {
+      _dataRequest = {
+        'device': _deviceInfo.vendorKey,
+        'lat': (_userCurrentLocation != null)
+            ? _userCurrentLocation.latitude.toString()
+            : 0,
+        'lng': (_userCurrentLocation != null)
+            ? _userCurrentLocation.longitude.toString()
+            : 0,
+        'type': (type == 3) ? "policia" : "medico",
+      };
+    } else {
+      _dataRequest = {
+        'device': _deviceInfo.vendorKey,
+        'lat': (_userCurrentLocation != null)
+            ? _userCurrentLocation.latitude.toString()
+            : 0,
+        'lng': (_userCurrentLocation != null)
+            ? _userCurrentLocation.longitude.toString()
+            : 0,
+        'token': "token",
+        'type': (type == 3) ? "policia" : "medico"
+      };
+    }
 
     try {
-      _response = await http.post(config.apiUrl + '/alerts_app', body: {
-        'device': _authenticatedUser.idDevice,
-        'code_panic': type.toString(),
-        'lat': _userCurrentLocation.latitude.toString(),
-        'lng': _userCurrentLocation.longitude.toString(),
-        'token': "token",
-        'type': (type == 3) ? "policia" : "medico",
-      });
-
+      print(_dataRequest.toString());
+      _response =
+          await http.post(config.apiUrl + '/alerts_app', body: _dataRequest);
       responseData = json.decode(_response.body);
+      print("Alert Alert" + _response.body);
+      if (responseData['status'] == 'active') {
+        _activeAlert = true;
+      }
+      // print("Alert Response" + _response.body);
     } catch (_ex) {
       AlertsDb.db.newAlert(new Alert(
           //idAlert: 0,
-          idDevice: _authenticatedUser.idDevice,
-          idUser: _authenticatedUser.idUser,
+          idDevice:
+              (_deviceInfo != null) ? _deviceInfo.idDevicePal.toString() : "",
+          idUser: (_authenticatedUser == null) ? 0 : _authenticatedUser.idUser,
           status: "sync",
           type: type.toString(),
           registerDate: ""));
-      print("Error en alerta ->" + _ex.toString());
+      print("Error en sendAlert() ->" + _ex.toString());
       return {
         'success': false,
         'message':
-            'No tienes internet, el alerta se actualizará en el dispositivo para tu siguiente conexión'
+            'No pudimos conectarnos con el servidor, intentalo más tarde o revisa tu conexión'
       };
     }
 
     if (responseData['status'] == true) {
       success = true;
-      message = 'Se envió la alerta';
-      fetchAlerts();
+      message = responseData['message'];
     } else {
       success = false;
       message = responseData['message'];
@@ -173,19 +252,22 @@ class AlertsModel extends ConnectedPalsModel {
     return {'success': success, 'message': message};
   }
 
-  /**
-   * 
-   */
+  ///
+  /// syncAlert
+  /// @version 1.8
+  /// Sincroniza una alerta de la base de datos
+  ///
   Future syncAlert(Alert alert) async {
     http.Response _response;
     Map<String, dynamic> responseData;
 
     try {
+      print("Current Location" + alert.type);
       _response = await http.post(config.apiUrl + '/alerts', body: {
-        'device': _authenticatedUser.idDevice,
+        'device': _deviceInfo.idDevicePal,
         'code_panic': alert.type.toString(),
-        'lat': _userCurrentLocation.latitude.toString(),
-        'lng': _userCurrentLocation.longitude.toString(),
+        // 'lat': _userCurrentLocation.latitude.toString(),
+        // 'lng': _userCurrentLocation.longitude.toString(),
         'register_device': alert.registerDate
       });
 
@@ -196,7 +278,7 @@ class AlertsModel extends ConnectedPalsModel {
     }
 
     if (responseData['status'] == true) {
-      fetchAlerts();
+      //fetchAlerts();
     } else {
       print("No se pudo sincronizar la alerta");
     }
@@ -360,6 +442,7 @@ class RefersModel extends ConnectedPalsModel {
 ///
 class UserModel extends ConnectedPalsModel {
   void setCurrentLocation(double lat, double lng) {
+    print("Hello setCurrentLocation!");
     if (lat != null && lat > 0) {
       _userCurrentLocation = new LocationData(
           latitude: lat, longitude: lng, description: null, address: null);
@@ -564,7 +647,7 @@ class UserModel extends ConnectedPalsModel {
 
   ///
   /// checkToken
-  /// @version 0.1.1
+  /// @version 1.8
   /// Verificara el token del usuario y lo renueva si es necesario
   /// TODO: Verificar token de acceso en api y app
   ///
@@ -574,8 +657,7 @@ class UserModel extends ConnectedPalsModel {
     http.Response _response;
     try {
       _response = await http.post(config.apiUrl + '/alerts', body: {
-        "device": _authenticatedUser.idDevice,
-        "token": _authenticatedUser.token,
+        "device": _deviceInfo.vendorKey,
         'code_panic': 2.toString(), //Hearbeat
         'lat': (_userCurrentLocation == null)
             ? 0.0.toString()
@@ -584,6 +666,7 @@ class UserModel extends ConnectedPalsModel {
             ? 0.0.toString()
             : _userCurrentLocation.longitude.toString(),
       });
+      print("CheckToken -> " + _response.body);
     } catch (err) {
       print("checkToken -> No hay conexión con el servidor ${err}");
       return;
@@ -592,15 +675,14 @@ class UserModel extends ConnectedPalsModel {
     final Map<String, dynamic> responseData = json.decode(_response.body);
 
     if (responseData['status'] == true) {
-      //TODO: Renovar el token cada 24 hrs
+      //TODO: Renovar el token cada inicio del app
       _activeAlert = responseData['response']['activeAlert'];
-    } else {
-      _authenticatedUser = null;
     }
     _isLoading = false;
     notifyListeners();
   }
 
+  ///
   /// track
   /// @version 0.1.1
   /// Verificara el token del usuario y lo renueva si es necesario

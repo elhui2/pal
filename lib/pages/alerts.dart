@@ -12,7 +12,7 @@ import '../widgets/location/gmap.dart';
 
 ///
 /// alerts
-/// @version 1.6.1
+/// @version 1.8
 /// @author Daniel Huidobro <daniel@rebootproject.mx>
 /// Boton de alerta del app
 ///
@@ -33,7 +33,20 @@ class _AlertsState extends State<Alerts> {
 
   @override
   initState() {
-    widget.model.checkToken();
+    location.hasPermission().then((permisions) {
+      if (permisions == false) {
+        print("Request Permissions Button");
+      } else {
+        location.getLocation().then((currentLoc) {
+          print(
+              "Init getLocation ${currentLoc.latitude},${currentLoc.longitude}");
+          widget.model
+              .setCurrentLocation(currentLoc.latitude, currentLoc.longitude);
+        }).catchError((error) {
+          print("Init Location Error  ${error.toString()}");
+        });
+      }
+    });
     super.initState();
   }
 
@@ -75,19 +88,19 @@ class _AlertsState extends State<Alerts> {
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
         builder: (BuildContext context, Widget child, MainModel model) {
-      AlertsDb.db.getStatusAlert().then((alert) {
-        if (alert == null) {
-          model.setActiveAlert(false);
-        } else if (alert.status == "process") {
-          // print("Hay alerta activa en el dispositivo, ya esta en el servidor!");
-          model.setActiveAlert(true);
-        } else if (alert.status == "sync") {
-          // print(
-          //     "Hay alerta activa en el dispositivo, esperando como perro internet!");
-          model.syncAlert(alert);
-          model.setActiveAlert(true);
-        }
-      });
+      // AlertsDb.db.getStatusAlert().then((alert) {
+      //   if (alert == null) {
+      //     model.setActiveAlert(false);
+      //   } else if (alert.status == "process") {
+      //     // print("Hay alerta activa en el dispositivo, ya esta en el servidor!");
+      //     model.setActiveAlert(true);
+      //   } else if (alert.status == "sync") {
+      //     // print(
+      //     //     "Hay alerta activa en el dispositivo, esperando como perro internet!");
+      //     model.syncAlert(alert);
+      //     model.setActiveAlert(true);
+      //   }
+      // });
       return Scaffold(
         // key: _scaffoldKey,
         drawer: NavBar(model),
@@ -206,6 +219,16 @@ class _AlertsState extends State<Alerts> {
                                   print("Error  ${error.toString()}");
                                 });
                               }
+                            });
+                          } else {
+                            location.getLocation().then((currentLoc) {
+                              print(
+                                  "NavButton getLocation ${currentLoc.latitude},${currentLoc.longitude}");
+                              model.setCurrentLocation(
+                                  currentLoc.latitude, currentLoc.longitude);
+                              Navigator.pushReplacementNamed(context, '/');
+                            }).catchError((error) {
+                              print("Error  ${error.toString()}");
                             });
                           }
                         });

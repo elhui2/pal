@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:device_info/device_info.dart';
+import 'dart:io' show Platform;
 
 import './config.dart';
+import './models/deviceInfo.dart';
 import './pages/auth.dart';
 import './pages/alerts_admin.dart';
 import './pages/refers_admin.dart';
@@ -10,11 +13,10 @@ import './scoped-models/main.dart';
 
 ///
 /// main.dart
-/// @version 1.6
+/// @version 1.8
 /// @author Daniel Huidobro daniel@rebootproject.mx
 ///
 void main() {
-  final Config config = Config();
   runApp(MyApp());
 }
 
@@ -30,12 +32,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    _model.autoAuthenticate().then((success) {
-      if (success) {
-        _model.checkToken();
-      }
-    });
     super.initState();
+    infoDevice();
   }
 
   @override
@@ -52,10 +50,11 @@ class _MyAppState extends State<MyApp> {
         routes: {
           '/': (BuildContext context) => ScopedModelDescendant(builder:
                   (BuildContext context, Widget child, MainModel model) {
-                return model.user == null ? AuthPage() : Alerts(_model);
+                return Alerts(_model);
               }),
           '/alerts': (BuildContext context) => AlertsAdmin(_model),
           '/refers': (BuildContext context) => RefersAdmin(_model),
+          '/login': (BuildContext context) => AuthPage(),
         },
         onGenerateRoute: (RouteSettings settings) {
           final List<String> pathElements = settings.name.split('/');
@@ -67,5 +66,43 @@ class _MyAppState extends State<MyApp> {
         onUnknownRoute: (RouteSettings settings) {},
       ),
     );
+  }
+
+  ///
+  ///infoDevice
+  ///@version 1.8
+  ///Saca la info del dispositivo
+  ///
+  Future<void> infoDevice() async {
+    //OS Info
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    DeviceInfo device;
+    if (Platform.isAndroid) {
+      print('Running on Android');
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      device = new DeviceInfo(
+          idDevicePal: null,
+          vendorKey: androidInfo.androidId,
+          type: 'android',
+          versionOs: androidInfo.version.toString(),
+          model: androidInfo.model,
+          vendorToken: null,
+          regDatePal: null);
+    } else if (Platform.isIOS) {
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      print('Running on Ios' + iosInfo.identifierForVendor);
+      device = new DeviceInfo(
+        idDevicePal: null,
+        vendorKey: iosInfo.identifierForVendor, //UUID
+        type: 'ios',
+        versionOs: iosInfo.systemVersion,
+        model: iosInfo.utsname.machine,
+        vendorToken: null, regDatePal: null,
+      );
+    }
+    //Update device in server
+    _model.setDeviceinfo(device).then((_) {
+      _model.checkToken();
+    });
   }
 }

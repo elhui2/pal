@@ -7,7 +7,7 @@ import '../../scoped-models/main.dart';
 
 ///
 /// Gmap
-/// @version 1.6.1
+/// @version 1.8
 /// @author Daniel Huidobro daniel@rebootproject.mx
 /// Mapa de google nativo
 ///
@@ -38,27 +38,27 @@ class _GmapState extends State<Gmap> {
       if (permisions == false) {
         location.requestPermission().then((request) {
           if (request == true) {
-            location.onLocationChanged().listen((currentLocation) {
-              // print(
-              //     "Init onLocationChanged ${currentLocation.latitude},${currentLocation.longitude}");
-              widget.model.setCurrentLocation(
-                  currentLocation.latitude, currentLocation.longitude);
-              currentPosition = new LatLng(
-                  currentLocation.latitude, currentLocation.longitude);
-              centerMarker(currentPosition);
-            });
+            // location.onLocationChanged().listen((currentLocation) {
+            //   // print(
+            //   //     "Init onLocationChanged ${currentLocation.latitude},${currentLocation.longitude}");
+            //   widget.model.setCurrentLocation(
+            //       currentLocation.latitude, currentLocation.longitude);
+            //   currentPosition = new LatLng(
+            //       currentLocation.latitude, currentLocation.longitude);
+            //   centerMarker(currentPosition);
+            // });
           }
         });
       } else {
-        location.onLocationChanged().listen((currentLocation) {
-          print(
-              "Init onLocationChanged ${currentLocation.latitude},${currentLocation.longitude}");
-          widget.model.setCurrentLocation(
-              currentLocation.latitude, currentLocation.longitude);
-          currentPosition =
-              new LatLng(currentLocation.latitude, currentLocation.longitude);
-          centerMarker(currentPosition);
-        });
+        // location.onLocationChanged().listen((currentLocation) {
+        //   print(
+        //       "Init onLocationChanged ${currentLocation.latitude},${currentLocation.longitude}");
+        //   widget.model.setCurrentLocation(
+        //       currentLocation.latitude, currentLocation.longitude);
+        //   currentPosition =
+        //       new LatLng(currentLocation.latitude, currentLocation.longitude);
+        //   centerMarker(currentPosition);
+        // });
       }
     });
   }
